@@ -94,6 +94,8 @@ public abstract class PathConstraint
             return ((PathConstraintLoop) con).getLoopPath();
         } else if (con instanceof PathConstraintNull) {
             return ((PathConstraintNull) con).getOp().toString();
+        } else if (con instanceof PathConstraintSubquery) {
+            return ((PathConstraintSubquery) con).toString();
         }
         return null;
     }
