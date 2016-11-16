@@ -34,11 +34,6 @@ import org.xml.sax.SAXParseException;
  **/
 public class XMLValidator
 {
-
-    private static final String QUERY_XMLNS
-        = "<xsq:query xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-          + "xmlns:xsq=\"http://intermine.org/query/1.0\" "
-          + "xsi:schemaLocation=\"http://intermine.org/query/1.0 query.xsd\"";
     private XMLValidatorErrorHandler errorHandler = null;
     private static final Logger LOG = Logger.getLogger(XMLValidator.class);
 
@@ -53,15 +48,6 @@ public class XMLValidator
         errorHandler = new XMLValidatorErrorHandler();
 
         try {
-            // `query.xsd` had to be edited to allow the `QueryType` to be exported. But this means
-            //  that now a `<query>` has to have a namespace associated. Here we do a simply
-            //  replacement to fake in the namespace of queries that are un-namespaced.
-            String[] parts = xmlSchemaUrl.split(Pattern.quote("/"));
-            if ("query.xsd".equals(parts[parts.length - 1])) {
-                xml = xml.replaceAll(Pattern.quote("<query"), QUERY_XMLNS);
-                xml = xml.replaceAll(Pattern.quote("</query>"), "</xsq:query>");
-            }
-
             // changed to use baseURL instead of current URL because tomcat uses a different
             // URL when in docker. There is no way this could not work.
             LOG.info("Using the xmlSchemaUrl " + xmlSchemaUrl);
