@@ -13,8 +13,6 @@ package org.intermine.pathquery;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.io.StringReader;
-
 import org.intermine.metadata.ConstraintOp;
 
 /**
@@ -43,7 +41,7 @@ public class PathConstraintSubquery extends PathConstraint
      * @throws IllegalArgumentException if the path contains colons or square brackets, or is
      * otherwise in a bad format, or if the op is invalid for this constraint type
      */
-    public PathConstraintSubquery(String path, ConstraintOp op, String subquery) {
+    public PathConstraintSubquery(String path, ConstraintOp op, PathQuery subquery) {
         super(path, op);
         if (op == null) {
             throw new NullPointerException("Cannot construct a PathConstraintSubquery"
@@ -56,8 +54,7 @@ public class PathConstraintSubquery extends PathConstraint
         if (subquery == null) {
             throw new NullPointerException("Cannot create a constraint to a null subquery");
         }
-        this.subquery = PathQueryBinding.unmarshalPathQuery(new StringReader(subquery),
-                PathQuery.USERPROFILE_VERSION);
+        this.subquery = subquery;
     }
 
     /**

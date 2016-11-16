@@ -151,6 +151,17 @@ public final class Constraints
     }
 
     /**
+     * Creates a constraint for a path to be IN a subquery.
+     *
+     * @param path the path to apply the constraint to
+     * @param subquery the subquery to constrain to
+     * @return a new PathConstraint object
+     */
+    public static PathConstraintSubquery in(String path, PathQuery subquery) {
+        return new PathConstraintSubquery(path, ConstraintOp.IN, subquery);
+    }
+
+    /**
      * Creates a constraint for a path to be NOT IN a named bag.
      *
      * @param path the path to apply the constraint to
