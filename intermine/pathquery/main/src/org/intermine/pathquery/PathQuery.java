@@ -1760,6 +1760,24 @@ public class PathQuery implements Cloneable
                     }
                 } else if (constraint instanceof PathConstraintSubclass) {
                     // Do nothing
+                } else if (constraint instanceof PathConstraintSubquery) {
+                    if (path.endIsAttribute()) {
+                        problems.add("Constraint " + constraint
+                                + " must not be on an attribute");
+                    }
+                    PathQuery subquery = ((PathConstraintSubquery) constraint).getSubquery();
+                    if (subquery.getView().size() > 1) {
+                        problems.add("Multiple attributes in the subquery " + subquery);
+                    }
+                    String viewAttribute = subquery.getView().get(0);
+                    Path viewAttributePath = new Path(subquery.getModel(), viewAttribute);
+                    if (!viewAttributePath.getPrefix().getEndType().equals(path.getEndType())) {
+                        problems.add("The type of the subquery constraint " + path
+                                + " must be the same of the type of the view (in the subquery) "
+                                + viewAttributePath);
+                    }
+                    List<String> subQueryProblems = subquery.verifyQuery();
+                    problems.addAll(subQueryProblems);
                 } else {
                     problems.add("Unrecognised constraint type "
                             + constraint.getClass().getName());
