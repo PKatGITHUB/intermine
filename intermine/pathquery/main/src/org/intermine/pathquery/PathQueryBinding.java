@@ -115,7 +115,7 @@ public class PathQueryBinding
             }
             marshalPathQueryJoinStyle(query, writer);
             marshalPathQueryDescriptions(query, writer);
-            marshalPathQueryConstraints(query, writer, hasMultipleConstraints);
+            marshalPathQueryConstraints(query, writer, hasMultipleConstraints, modelName, version);
             writer.writeEndElement();
         } catch (XMLStreamException e) {
             throw new RuntimeException(e);
@@ -153,11 +153,12 @@ public class PathQueryBinding
      * Create XML for the constraints in a PathQuery.
      */
     private void marshalPathQueryConstraints(PathQuery query, XMLStreamWriter writer,
-            boolean hasMultipleConstraints)
+            boolean hasMultipleConstraints, String modelName, int version)
         throws XMLStreamException {
         for (Map.Entry<PathConstraint, String> constraint : query.getConstraints().entrySet()) {
             boolean emptyElement = true;
-            if (constraint.getKey() instanceof PathConstraintMultiValue) {
+            if (constraint.getKey() instanceof PathConstraintMultiValue
+                    || constraint.getKey() instanceof PathConstraintSubquery) {
                 emptyElement = false;
             }
 
@@ -225,6 +226,10 @@ public class PathQueryBinding
                 if (extraValue != null) {
                     writer.writeAttribute("extraValue", extraValue);
                 }
+            } else if (constraint.getKey() instanceof PathConstraintSubquery) {
+                writer.writeAttribute("op", "" + constraint.getKey().getOp());
+                doMarshal(((PathConstraintSubquery) constraint.getKey()).getSubquery(), "subquery",
+                        modelName, writer, version);
             } else {
                 throw new IllegalStateException("Unrecognised constraint type "
                         + constraint.getKey().getClass().getName());

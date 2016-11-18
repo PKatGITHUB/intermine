@@ -16,8 +16,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.intermine.metadata.ConstraintOp;
 import org.intermine.pathquery.PathConstraint;
 import org.intermine.pathquery.PathConstraintSubclass;
+import org.intermine.pathquery.PathConstraintSubquery;
 import org.intermine.pathquery.PathQuery;
 import org.intermine.pathquery.PathQueryHandler;
 import org.intermine.template.SwitchOffAbility;
@@ -71,6 +73,7 @@ public class TemplateQueryHandler extends PathQueryHandler
             String code = attrs.getValue("code");
             String type = attrs.getValue("type");
             if (type != null) {
+                PathQuery query = queryStack.peek();
                 query.addConstraint(new PathConstraintSubclass(path, type));
             } else {
                 path = path.replace(':', '.');
@@ -78,11 +81,13 @@ public class TemplateQueryHandler extends PathQueryHandler
                     throw new NullPointerException("Null path while processing template "
                             + templateName);
                 }
-                constraintPath = path;
-                constraintAttributes = new HashMap<String, String>();
+                String constraintPath = path;
+                constraintPathStack.push(constraintPath);
+                HashMap<String, String> constraintAttributes = new HashMap<String, String>();
                 for (int i = 0; i < attrs.getLength(); i++) {
                     constraintAttributes.put(attrs.getQName(i), attrs.getValue(i));
                 }
+                constraintAttributesStack.push(constraintAttributes);
                 constraintValues = new LinkedHashSet<String>();
                 constraintCode = code;
 
@@ -98,6 +103,7 @@ public class TemplateQueryHandler extends PathQueryHandler
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if ("template".equals(qName)) {
+            PathQuery query = queryStack.peek();
             TemplateQuery t = new TemplateQuery(templateName, templateTitle, templateComment,
                     query);
             t.setEditableConstraints(editableConstraints);
@@ -112,9 +118,18 @@ public class TemplateQueryHandler extends PathQueryHandler
             reset();
         // constraintPath will be null if this is a subclass constraint
         // subclass constraints have already been processed
-        } else if ("constraint".equals(qName) && (constraintPath != null)) {
+        } else if ("constraint".equals(qName) && (constraintPathStack.peek() != null)) {
+            PathQuery query = queryStack.peek();
+            String constraintPath = constraintPathStack.pop();
+            Map<String, String> constraintAttributes = constraintAttributesStack.pop();
             PathConstraint constraint = processConstraint(query, constraintPath,
                     constraintAttributes, constraintValues);
+            if (constraint == null) {
+                constraint = new PathConstraintSubquery(constraintPath,
+                        ConstraintOp.getConstraintOp(constraintAttributes.get("op")), query);
+                queryStack.pop();
+                query = queryStack.peek();
+            }
             if (constraintCode == null) {
                 query.addConstraint(constraint);
             } else {

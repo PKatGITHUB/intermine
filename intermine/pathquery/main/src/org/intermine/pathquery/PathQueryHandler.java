@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -38,10 +39,12 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class PathQueryHandler extends DefaultHandler
 {
-    private final Map<String, PathQuery> queries;
+    protected final Map<String, PathQuery> queries;
     private String queryName;
-    protected PathQuery query;
-    protected String constraintLogic = null;
+    //protected PathQuery query;
+    protected Stack<PathQuery> queryStack = new Stack<PathQuery>();
+    //protected String constraintLogic = null;
+    protected Stack<String> constraintLogicStack = new Stack<String>();
     protected String currentNodePath = null;
     private Model model = null;
     protected int version;
@@ -52,8 +55,11 @@ public class PathQueryHandler extends DefaultHandler
                     "Boolean", "Float", "Double", "Short", "Integer", "Long",
                     "BigDecimal", "Date", "String"));
     private StringBuilder valueBuffer = null;
-    protected String constraintPath = null;
-    protected Map<String, String> constraintAttributes = null;
+    //protected String constraintPath = null;
+    protected Stack<String> constraintPathStack = new Stack<String>();
+    //protected Map<String, String> constraintAttributes = null;
+    protected Stack<Map<String, String>> constraintAttributesStack
+        = new Stack<Map<String, String>>();
     protected Collection<String> constraintValues = null;
     protected String constraintCode = null;
     private static final Logger LOG = Logger.getLogger(PathQueryHandler.class);
@@ -107,11 +113,14 @@ public class PathQueryHandler extends DefaultHandler
         if (valueBuffer != null) {
             throw new SAXException("Cannot have any tags inside a value tag");
         }
-        if ((constraintPath != null)
+        //String constraintPath = constraintPathStack.peek();
+        //TO FIX it
+        /*if ((constraintPath != null)
                 && !("value".equals(qName) || "nullValue".equals(qName))) {
             throw new SAXException(
-                    "Cannot have anything other than value tag inside a constraint");
-        }
+                    "Cannot have anything other than value tag or query (for subquery) "
+                    + inside a constraint");
+        }*/
         if ("query-list".equals(qName)) {
             // Do nothing
         } else if ("query".equals(qName)) {
@@ -126,7 +135,8 @@ public class PathQueryHandler extends DefaultHandler
                     throw new SAXException(e);
                 }
             }
-            query = new PathQuery(model);
+            PathQuery query = new PathQuery(model);
+            queryStack.push(query);
 
             if (attrs.getValue("title") != null
                     && !attrs.getValue("title").isEmpty()) {
@@ -160,13 +170,15 @@ public class PathQueryHandler extends DefaultHandler
                 }
                 query.addOrderBySpaceSeparated(so);
             }
-            constraintLogic = attrs.getValue("constraintLogic");
+            String constraintLogic = (attrs.getValue("constraintLogic") != null )
+                    ? attrs.getValue("constraintLogic") : StringUtils.EMPTY;
+            constraintLogicStack.push(constraintLogic);
             questionableSubclasses = new ArrayList<PathConstraintSubclass>();
         } else if ("node".equals(qName)) {
             // There's a node tag, so all constraints inside must inherit this
             // path. Set it in a
             // variable, and reset the variable to null when we see the end tag.
-
+            PathQuery query = queryStack.peek();
             currentNodePath = attrs.getValue("path");
             if (currentNodePath.contains(":")) {
                 setOuterJoins(query, currentNodePath);
@@ -194,15 +206,18 @@ public class PathQueryHandler extends DefaultHandler
             String code = attrs.getValue("code");
             String type = attrs.getValue("type");
             if (type != null) {
+                PathQuery query = queryStack.peek();
                 query.addConstraint(new PathConstraintSubclass(path, type));
             } else {
                 path = path.replace(':', '.');
-                constraintPath = path;
-                constraintAttributes = new HashMap<String, String>();
+                String constraintPath = path;
+                constraintPathStack.push(constraintPath);
+                HashMap<String, String> constraintAttributes = new HashMap<String, String>();
                 for (int i = 0; i < attrs.getLength(); i++) {
                     constraintAttributes.put(attrs.getQName(i),
                             attrs.getValue(i));
                 }
+                constraintAttributesStack.push(constraintAttributes);
                 constraintValues = new LinkedHashSet<String>();
                 constraintCode = code;
             }
@@ -222,6 +237,7 @@ public class PathQueryHandler extends DefaultHandler
                         + "' for description: " + description);
             }
             String pathToCheck = pathString + ".";
+            PathQuery query = queryStack.peek();
             for (String viewString : query.getView()) {
                 if (viewString.startsWith(pathToCheck)) {
                     query.setDescription(pathString, description);
@@ -231,6 +247,7 @@ public class PathQueryHandler extends DefaultHandler
         } else if ("join".equals(qName)) {
             String pathString = attrs.getValue("path");
             String type = attrs.getValue("style");
+            PathQuery query = queryStack.peek();
             if ("INNER".equals(type.toUpperCase())) {
                 query.setOuterJoinStatus(pathString, OuterJoinStatus.INNER);
             } else if ("OUTER".equals(type.toUpperCase())) {
@@ -356,10 +373,11 @@ public class PathQueryHandler extends DefaultHandler
                 }
                 return new PathConstraintIds(path, constraintOp, idsCollection);
             } else {
-                throw new SAXException("Invalid query: operation was: "
+                /*throw new SAXException("Invalid query: operation was: "
                         + constraintOp
                         + " but no bag or ids were provided (from text \""
-                        + attrs.get("op") + "\", attributes: " + attrs + ")");
+                        + attrs.get("op") + "\", attributes: " + attrs + ")");*/
+                return null;
             }
 
         } else if (PathConstraintMultiValue.VALID_OPS.contains(constraintOp)) {
@@ -390,7 +408,9 @@ public class PathQueryHandler extends DefaultHandler
     public void endElement(String uri, String localName, String qName)
         throws SAXException {
         if ("query".equals(qName)) {
-            if (constraintLogic != null) {
+            PathQuery query = queryStack.peek();
+            String constraintLogic = constraintLogicStack.pop();
+            if (constraintLogic != null && !constraintLogic.isEmpty()) {
                 query.setConstraintLogic(constraintLogic);
             }
 
@@ -413,24 +433,37 @@ public class PathQueryHandler extends DefaultHandler
                     throw new Error("Error", e);
                 }
             }
-            queries.put(queryName, query);
+            if (queryStack.size() == 1) {
+                queries.put(queryName, query);
+                queryStack.pop();
+            }
         } else if ("node".equals(qName)) {
             currentNodePath = null;
-        } else if ("constraint".equals(qName) && (constraintPath != null)) {
+        } else if ("constraint".equals(qName) && (constraintPathStack.peek() != null)) {
+            PathQuery query = queryStack.peek();
+            String constraintPath = constraintPathStack.pop();
+            Map<String, String> constraintAttributes = constraintAttributesStack.pop();
             PathConstraint constraint = processConstraint(query,
                     constraintPath, constraintAttributes, constraintValues);
+            if (constraint == null) {
+                constraint = new PathConstraintSubquery(constraintPath,
+                        ConstraintOp.getConstraintOp(constraintAttributes.get("op")), query);
+                queryStack.pop();
+                query = queryStack.peek();
+            }
             if (constraintCode == null) {
                 query.addConstraint(constraint);
             } else {
                 query.addConstraint(constraint, constraintCode);
             }
+            constraintCode = null;
             constraintPath = null;
         } else if ("value".equals(qName)) {
             if (valueBuffer == null || valueBuffer.length() < 1) {
                 throw new NullPointerException(
                         "No value provided in value tag."
                                 + " Failed for template query: " + queryName
-                                + " on constraint: " + constraintPath);
+                                + " on constraint: " + constraintPathStack.peek());
             }
             constraintValues.add(valueBuffer.toString());
             valueBuffer = null;

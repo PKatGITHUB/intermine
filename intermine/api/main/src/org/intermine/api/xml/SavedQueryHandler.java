@@ -65,6 +65,7 @@ public class SavedQueryHandler extends PathQueryHandler
     public void endElement(String uri, String localName, String qName) throws SAXException {
         super.endElement(uri, localName, qName);
         if ("saved-query".equals(qName)) {
+            PathQuery query = super.queries.get(queryName);
             queries.put(queryName, new SavedQuery(queryName, dateCreated, query));
             dateCreated = null;
         }

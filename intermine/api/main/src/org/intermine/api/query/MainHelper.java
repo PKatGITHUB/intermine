@@ -91,6 +91,7 @@ import org.intermine.pathquery.PathConstraintMultitype;
 import org.intermine.pathquery.PathConstraintNull;
 import org.intermine.pathquery.PathConstraintRange;
 import org.intermine.pathquery.PathConstraintSubclass;
+import org.intermine.pathquery.PathConstraintSubquery;
 import org.intermine.pathquery.PathException;
 import org.intermine.pathquery.PathQuery;
 import org.intermine.util.PropertiesUtil;
@@ -675,6 +676,23 @@ public final class MainHelper
                     if (returnBagQueryResults != null) {
                         returnBagQueryResults.put(stringPath, bagQueryResult);
                     }
+                } else if (constraint instanceof PathConstraintSubquery) {
+                    PathConstraintSubquery pcs = (PathConstraintSubquery) constraint;
+                    PathQuery pathSubquery = pcs.getSubquery();
+                    Map<String, QuerySelectable> pathToQueryNode =
+                            new HashMap<String, QuerySelectable>();
+                    Query subquery = makeQuery(pathSubquery, savedBags, pathToQueryNode,
+                            bagQueryRunner, returnBagQueryResults);
+                    List<QuerySelectable> select = subquery.getSelect();
+                    QuerySelectable selectNode = select.get(0);
+                    subquery.deleteFromSelect(selectNode);
+                    QueryField idSubquery = new QueryField((QueryClass) selectNode, "id");
+                    subquery.addToSelect(idSubquery);
+                    QueryField outerQFConstraint = new QueryField(subquery, idSubquery);
+                    QueryField id = new QueryField((QueryClass) field, "id");
+                    ((Query) q).addFrom(subquery);
+                    codeToConstraint.put(code, new SimpleConstraint(id,
+                                ConstraintOp.EQUALS, outerQFConstraint));
                 } else {
                     throw new ObjectStoreException("Unknown constraint type "
                             + constraint.getClass().getName());
