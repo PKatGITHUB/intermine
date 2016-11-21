@@ -40,7 +40,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class PathQueryHandler extends DefaultHandler
 {
     protected final Map<String, PathQuery> queries;
-    private String queryName;
+    protected String queryName;
     //protected PathQuery query;
     protected Stack<PathQuery> queryStack = new Stack<PathQuery>();
     //protected String constraintLogic = null;
