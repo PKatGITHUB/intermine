@@ -94,7 +94,7 @@ public class PathQueryBuilderTest extends TestCase {
             throw e;
         } catch (BadRequestException e) {
             assertEquals(
-                "Query does not pass XML validation. cvc-complex-type.4: Attribute 'view' must appear on element 'xsq:query'.",
+                "Query does not pass XML validation. cvc-complex-type.4: Attribute 'view' must appear on element 'query'.",
                 e.getMessage().trim()
             );
         } catch (Throwable t) {
