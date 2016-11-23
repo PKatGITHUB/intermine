@@ -75,7 +75,7 @@ public class TemplateQueryHandler extends PathQueryHandler
             if (type != null) {
                 PathQuery query = queryStack.peek();
                 query.addConstraint(new PathConstraintSubclass(path, type));
-                subclassConstraint = true;
+                isSubclassConstraint = true;
             } else {
                 path = path.replace(':', '.');
                 if (path == null) {
@@ -118,8 +118,8 @@ public class TemplateQueryHandler extends PathQueryHandler
             templates.put(templateName, t);
             reset();
         } else if ("constraint".equals(qName)) {
-            if (subclassConstraint) {
-                subclassConstraint = false;
+            if (isSubclassConstraint) {
+                isSubclassConstraint = false;
                 return;
             }
             PathQuery query = queryStack.peek();

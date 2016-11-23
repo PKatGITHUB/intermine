@@ -62,7 +62,8 @@ public class PathQueryHandler extends DefaultHandler
         = new Stack<Map<String, String>>();
     protected Collection<String> constraintValues = null;
     protected String constraintCode = null;
-    protected boolean subclassConstraint = false;
+    protected boolean isSubclassConstraint = false;
+    protected boolean isConstraintAttribute = false;
     private static final Logger LOG = Logger.getLogger(PathQueryHandler.class);
 
     /**
@@ -114,17 +115,17 @@ public class PathQueryHandler extends DefaultHandler
         if (valueBuffer != null) {
             throw new SAXException("Cannot have any tags inside a value tag");
         }
-        //String constraintPath = constraintPathStack.peek();
-        //TO FIX it
-        /*if ((constraintPath != null)
-                && !("value".equals(qName) || "nullValue".equals(qName))) {
+        if (isConstraintAttribute
+                && !("value".equals(qName) || "nullValue".equals(qName) || "query".equals(qName))) {
             throw new SAXException(
                     "Cannot have anything other than value tag or query (for subquery) "
-                    + inside a constraint");
-        }*/
+                    + "inside a constraint");
+        }
         if ("query-list".equals(qName)) {
             // Do nothing
+            isConstraintAttribute = false;
         } else if ("query".equals(qName)) {
+            isConstraintAttribute = false;
             queryName = validateName(attrs.getValue("name"));
             String modelName = attrs.getValue("model");
             if (models.containsKey(modelName)) {
@@ -176,6 +177,7 @@ public class PathQueryHandler extends DefaultHandler
             constraintLogicStack.push(constraintLogic);
             questionableSubclasses = new ArrayList<PathConstraintSubclass>();
         } else if ("node".equals(qName)) {
+            isConstraintAttribute = false;
             // There's a node tag, so all constraints inside must inherit this
             // path. Set it in a
             // variable, and reset the variable to null when we see the end tag.
@@ -196,6 +198,7 @@ public class PathQueryHandler extends DefaultHandler
                 questionableSubclasses.add(subclass);
             }
         } else if ("constraint".equals(qName)) {
+            isConstraintAttribute = true;
             String path = attrs.getValue("path");
             if (currentNodePath != null) {
                 if (path != null) {
@@ -209,7 +212,7 @@ public class PathQueryHandler extends DefaultHandler
             if (type != null) {
                 PathQuery query = queryStack.peek();
                 query.addConstraint(new PathConstraintSubclass(path, type));
-                subclassConstraint = true;
+                isSubclassConstraint = true;
             } else {
                 path = path.replace(':', '.');
                 String constraintPath = path;
@@ -224,6 +227,7 @@ public class PathQueryHandler extends DefaultHandler
                 constraintCode = code;
             }
         } else if ("pathDescription".equals(qName)) {
+            isConstraintAttribute = false;
             String pathString = attrs.getValue("pathString");
             String description = attrs.getValue("description");
 
@@ -247,6 +251,7 @@ public class PathQueryHandler extends DefaultHandler
                 }
             }
         } else if ("join".equals(qName)) {
+            isConstraintAttribute = false;
             String pathString = attrs.getValue("path");
             String type = attrs.getValue("style");
             PathQuery query = queryStack.peek();
@@ -442,8 +447,8 @@ public class PathQueryHandler extends DefaultHandler
         } else if ("node".equals(qName)) {
             currentNodePath = null;
         } else if ("constraint".equals(qName)) {
-            if (subclassConstraint) {
-                subclassConstraint = false;
+            if (isSubclassConstraint) {
+                isSubclassConstraint = false;
                 return;
             }
             PathQuery query = queryStack.peek();

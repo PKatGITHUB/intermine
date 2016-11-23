@@ -118,7 +118,7 @@ public class PathQueryUnmarshalTest extends  TestCase
         try {
             createQuery("BadConstraintStructure.xml");
         } catch (RuntimeException e) {
-            assertEquals("Cannot have anything other than value tag inside a constraint",
+            assertEquals("Cannot have anything other than value tag or query (for subquery) inside a constraint",
                     e.getCause().getMessage());
             return;
         }
