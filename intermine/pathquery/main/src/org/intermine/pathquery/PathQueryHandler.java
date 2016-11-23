@@ -62,6 +62,7 @@ public class PathQueryHandler extends DefaultHandler
         = new Stack<Map<String, String>>();
     protected Collection<String> constraintValues = null;
     protected String constraintCode = null;
+    protected boolean subclassConstraint = false;
     private static final Logger LOG = Logger.getLogger(PathQueryHandler.class);
 
     /**
@@ -208,6 +209,7 @@ public class PathQueryHandler extends DefaultHandler
             if (type != null) {
                 PathQuery query = queryStack.peek();
                 query.addConstraint(new PathConstraintSubclass(path, type));
+                subclassConstraint = true;
             } else {
                 path = path.replace(':', '.');
                 String constraintPath = path;
@@ -439,7 +441,11 @@ public class PathQueryHandler extends DefaultHandler
             }
         } else if ("node".equals(qName)) {
             currentNodePath = null;
-        } else if ("constraint".equals(qName) && (constraintPathStack.peek() != null)) {
+        } else if ("constraint".equals(qName)) {
+            if (subclassConstraint) {
+                subclassConstraint = false;
+                return;
+            }
             PathQuery query = queryStack.peek();
             String constraintPath = constraintPathStack.pop();
             Map<String, String> constraintAttributes = constraintAttributesStack.pop();
