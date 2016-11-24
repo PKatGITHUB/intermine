@@ -43,5 +43,16 @@
   <query name="idBagConstraints" model="testmodel" view="Company.name Company.vatNumber" longDescription="">
     <constraint path="Company" op="IN" ids="1,5,7"/>
   </query>
-
+  <query name="nestedsubquery" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+    <constraint path="Employee.age" code="A" op="&lt;" value="30"/>
+    <constraint path="Employee" code="B" op="IN">
+      <query name="" model="testmodel" view="Company.departments.employees.id" longDescription="">
+        <constraint path="Company" op="IN">
+          <query name="" model="testmodel" view="Company.id" longDescription="">
+            <constraint path="Company.secretarys.name" op="=" value="Secretary3"/>
+          </query>
+        </constraint>
+      </query>
+    </constraint>
+  </query>
 </query-list>

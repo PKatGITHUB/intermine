@@ -5,10 +5,12 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.intermine.metadata.ConstraintOp;
 import org.intermine.metadata.Model;
 
 /*
@@ -30,7 +32,17 @@ import org.intermine.metadata.Model;
  **/
 public class PathQueryUnmarshalTest extends  TestCase
 {
+    Map<String, PathQuery> subQueries;
 
+    public void setUp() throws Exception {
+        super.setUp();
+        InputStream is = getClass().getClassLoader().getResourceAsStream("PathQueryBindingUnmarshal/SubqueryConstraint.xml");
+        subQueries = PathQueryBinding.unmarshalPathQueries(new InputStreamReader(is), 1);
+    }
+
+/*    public PathQueryBindingTest(String arg) {
+        super(arg);
+    }*/
     public void testUnknownModel() {
         /*
          * Just now throws exception. It will change later.
@@ -233,5 +245,88 @@ public class PathQueryUnmarshalTest extends  TestCase
         Model.getInstanceByName("testmodel");
         PathQuery ret = PathQueryBinding.unmarshalPathQueries(new InputStreamReader(is), 1).values().iterator().next();
         return ret;
+    }
+
+    public void testSimpleSubquery() {
+        String path = "PathQueryBindingUnmarshal/SubqueryConstraint.xml";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
+        Map<String, PathQuery> pathQueries = PathQueryBinding.unmarshalPathQueries(new InputStreamReader(is), 1);
+
+        PathQuery simpleSubquery = pathQueries.get("simplesubquery");
+        assertEquals(Collections.EMPTY_LIST, simpleSubquery.verifyQuery());
+        PathConstraintSubquery subQueryConstraint = (PathConstraintSubquery) simpleSubquery.getConstraintsForPath("Employee").get(0);
+        assertEquals("Employee", subQueryConstraint.getPath());
+        assertEquals("<query name=\"query\" model=\"testmodel\" view=\"Company.departments.employees.id\" longDescription=\"\"><constraint path=\"Company.name\" op=\"=\" value=\"CompanyA\"/></query>", subQueryConstraint.getSubquery().toXml());
+
+        PathQuery subQuery = subQueryConstraint.getSubquery();
+        PathConstraintAttribute constraintAttribute = (PathConstraintAttribute) subQuery.getConstraintsForPath("Company.name").get(0);
+        assertEquals("CompanyA", constraintAttribute.getValue());
+        assertEquals(ConstraintOp.EQUALS, constraintAttribute.getOp());
+    }
+
+    public void testConstaintPlusSubquery() {
+        String path = "PathQueryBindingUnmarshal/SubqueryConstraint.xml";
+        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
+        Map<String, PathQuery> pathQueries = PathQueryBinding.unmarshalPathQueries(new InputStreamReader(is), 1);
+
+        PathQuery simpleSubquery = pathQueries.get("constraintplussubquery");
+        assertEquals(Collections.EMPTY_LIST, simpleSubquery.verifyQuery());
+
+        //verify subqueryconstarint
+        PathConstraintSubquery subQueryConstraint = (PathConstraintSubquery) simpleSubquery.getConstraintsForPath("Employee").get(0);
+        assertEquals("Employee", subQueryConstraint.getPath());
+        assertEquals("<query name=\"query\" model=\"testmodel\" view=\"Company.departments.employees.id\" longDescription=\"\"><constraint path=\"Company.name\" op=\"=\" value=\"CompanyA\"/></query>", subQueryConstraint.getSubquery().toXml());
+
+        //verify other constraint
+        PathConstraintAttribute constraintAttribute = (PathConstraintAttribute) simpleSubquery.getConstraintsForPath("Employee.age").get(0);
+        assertEquals("30", constraintAttribute.getValue());
+        assertEquals(ConstraintOp.EQUALS, constraintAttribute.getOp());
+    }
+
+    public void testNestedSubquery() {
+        PathQuery query = subQueries.get("nestedsubquery");
+        assertEquals(Collections.EMPTY_LIST, query.verifyQuery());
+
+        //verify simple constraint
+        PathConstraintAttribute constraintAttribute = (PathConstraintAttribute) query.getConstraintsForPath("Employee.age").get(0);
+        assertEquals("30", constraintAttribute.getValue());
+        assertEquals(ConstraintOp.LESS_THAN, constraintAttribute.getOp());
+
+        PathConstraintSubquery subQueryConstraint = (PathConstraintSubquery) query.getConstraintsForPath("Employee").get(0);
+        assertEquals("Employee", subQueryConstraint.getPath());
+        assertEquals("<query name=\"query\" model=\"testmodel\" view=\"Company.departments.employees.id\" longDescription=\"\"><constraint path=\"Company\" op=\"IN\"><query name=\"query\" model=\"testmodel\" view=\"Company.id\" longDescription=\"\"><constraint path=\"Company.secretarys.name\" op=\"=\" value=\"Secretary3\"/></query></constraint></query>", subQueryConstraint.getSubquery().toXml());
+
+        PathQuery subQuery = subQueryConstraint.getSubquery();
+        PathQuery nestedSubQuery = ((PathConstraintSubquery) subQuery.getConstraintsForPath("Company").get(0)).getSubquery();
+        assertEquals(1, nestedSubQuery.getView().size());
+        assertEquals("Company.id", nestedSubQuery.getView().get(0));
+
+        PathConstraintAttribute nestedConstraintAttribute = (PathConstraintAttribute) nestedSubQuery.getConstraintsForPath("Company.secretarys.name").get(0);
+        assertEquals("Secretary3", nestedConstraintAttribute.getValue());
+        assertEquals(ConstraintOp.EQUALS, nestedConstraintAttribute.getOp());
+    }
+
+    public void testPathConstraintInSubquery() {
+        PathQuery query = subQueries.get("badpathconstrint");
+        String message = "Constraint with path Employee.id must not be an attribute";
+        assertTrue(message, !query.isValid());        
+    }
+
+    public void testViewIsAttributeInSubquery() {
+        PathQuery query = subQueries.get("badview");
+        String message = "Path Company.departments.employees in view list must be an attribute";
+        assertTrue(message, !query.isValid());        
+    }
+
+    public void testMultipleViewInSubquery() {
+        PathQuery query = subQueries.get("multipleview");
+        String message = "Multiple attributes in the subquery";
+        assertTrue(message, !query.isValid());        
+    }
+    
+    public void testViewTypeInSubquery() {
+        PathQuery query = subQueries.get("badtype");
+        String message = "The type of the subquery constraint Employee must be the same of the type of the view (in the subquery) Company.departments.id";
+        assertTrue(message, !query.isValid());
     }
 }

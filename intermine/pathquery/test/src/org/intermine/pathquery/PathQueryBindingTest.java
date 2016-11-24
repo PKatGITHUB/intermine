@@ -81,6 +81,19 @@ public class PathQueryBindingTest extends TestCase
         //                            + "constrained to be in bags.");
         //employeesInBag.problems.add(e);
         expected.put("employeeEndInBag", employeesInBag);
+    
+        //nested subquery
+        PathQuery queryWithSubquery = new PathQuery(model);
+        queryWithSubquery.addViews("Employee.name", "Employee.age");
+        queryWithSubquery.addConstraint(new PathConstraintAttribute("Employee.age", ConstraintOp.LESS_THAN, "30"));
+        PathQuery subquery = new PathQuery(model);
+        subquery.addViews("Company.departments.employees.id");
+        PathQuery nestedSubquery = new PathQuery(model);
+        nestedSubquery.addViews("Company.id");
+        nestedSubquery.addConstraint(new PathConstraintAttribute("Company.secretarys.name", ConstraintOp.EQUALS, "Secretary3"));
+        subquery.addConstraint(new PathConstraintSubquery("Company", ConstraintOp.IN, nestedSubquery));
+        queryWithSubquery.addConstraint(new PathConstraintSubquery("Employee", ConstraintOp.IN, subquery));
+        expected.put("nestedsubquery", queryWithSubquery);
 
         return expected;
     }
@@ -162,5 +175,9 @@ public class PathQueryBindingTest extends TestCase
         q.setDescription("Flibble");
         q.setDescription("Employee.name", "Albert");
         assertEquals("<query name=\"test\" model=\"testmodel\" view=\"Employee.name Employee.department.name\" longDescription=\"Flibble\" sortOrder=\"Employee.age asc\" constraintLogic=\"A or B\"><join path=\"Employee.department\" style=\"INNER\"/><pathDescription pathString=\"Employee.name\" description=\"Albert\"/><constraint path=\"Employee.age\" code=\"A\" op=\"&lt;\" value=\"50\"/><constraint path=\"Employee.department.name\" code=\"B\" op=\"=\" value=\"Fred\"/></query>", PathQueryBinding.marshal(q, "test", "testmodel", 1));
+    }
+    
+    public void testNestedSubquery() {
+        assertEquals(expected.get("nestedsubquery").toString(), savedQueries.get("nestedsubquery").toString());
     }
 }

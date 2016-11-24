@@ -1,0 +1,57 @@
+<query-list>
+<query name="simplesubquery" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees.id" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+<query name="constraintplussubquery" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee.age" code="A" op="=" value="30"/>
+  <constraint path="Employee" code="B" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees.id" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+<query name="nestedsubquery" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee.age" code="A" op="&lt;" value="30"/>
+  <constraint path="Employee" code="B" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees.id" longDescription="">
+  <constraint path="Company" op="IN">
+    <query name="" model="testmodel" view="Company.id" longDescription="">
+      <constraint path="Company.secretarys.name" op="=" value="Secretary3"/>
+    </query>
+  </constraint>
+  </query>
+</constraint>
+</query>
+<query name="badpathconstrint" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee.id" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees.id" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+<query name="badview" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+<query name="multipleview" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee" op="IN">
+  <query name="" model="testmodel" view="Company.departments.employees.id Company.departments.employees.name" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+<query name="badtype" model="testmodel" view="Employee.name Employee.age" longDescription="" constraintLogic="A and B">
+  <constraint path="Employee" op="IN">
+  <query name="" model="testmodel" view="Company.departments.id" longDescription="">
+  <constraint path="Company.name" op="=" value="CompanyA"/>
+  </query>
+</constraint>
+</query>
+</query-list>
