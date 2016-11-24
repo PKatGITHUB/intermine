@@ -228,7 +228,7 @@ public class PathQueryBinding
                 }
             } else if (constraint.getKey() instanceof PathConstraintSubquery) {
                 writer.writeAttribute("op", "" + constraint.getKey().getOp());
-                doMarshal(((PathConstraintSubquery) constraint.getKey()).getSubquery(), "subquery",
+                doMarshal(((PathConstraintSubquery) constraint.getKey()).getSubquery(), "query",
                         modelName, writer, version);
             } else {
                 throw new IllegalStateException("Unrecognised constraint type "
