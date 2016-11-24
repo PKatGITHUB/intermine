@@ -123,7 +123,6 @@ public class PathQueryHandler extends DefaultHandler
         }
         if ("query-list".equals(qName)) {
             // Do nothing
-            isConstraintAttribute = false;
         } else if ("query".equals(qName)) {
             isConstraintAttribute = false;
             queryName = validateName(attrs.getValue("name"));
@@ -177,7 +176,6 @@ public class PathQueryHandler extends DefaultHandler
             constraintLogicStack.push(constraintLogic);
             questionableSubclasses = new ArrayList<PathConstraintSubclass>();
         } else if ("node".equals(qName)) {
-            isConstraintAttribute = false;
             // There's a node tag, so all constraints inside must inherit this
             // path. Set it in a
             // variable, and reset the variable to null when we see the end tag.
@@ -227,7 +225,6 @@ public class PathQueryHandler extends DefaultHandler
                 constraintCode = code;
             }
         } else if ("pathDescription".equals(qName)) {
-            isConstraintAttribute = false;
             String pathString = attrs.getValue("pathString");
             String description = attrs.getValue("description");
 
@@ -251,7 +248,6 @@ public class PathQueryHandler extends DefaultHandler
                 }
             }
         } else if ("join".equals(qName)) {
-            isConstraintAttribute = false;
             String pathString = attrs.getValue("path");
             String type = attrs.getValue("style");
             PathQuery query = queryStack.peek();
@@ -451,6 +447,7 @@ public class PathQueryHandler extends DefaultHandler
                 isSubclassConstraint = false;
                 return;
             }
+            isConstraintAttribute = false;
             PathQuery query = queryStack.peek();
             String constraintPath = constraintPathStack.pop();
             Map<String, String> constraintAttributes = constraintAttributesStack.pop();
