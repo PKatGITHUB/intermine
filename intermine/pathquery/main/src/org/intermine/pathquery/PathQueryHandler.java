@@ -443,11 +443,11 @@ public class PathQueryHandler extends DefaultHandler
         } else if ("node".equals(qName)) {
             currentNodePath = null;
         } else if ("constraint".equals(qName)) {
+            isConstraintAttribute = false;
             if (isSubclassConstraint) {
                 isSubclassConstraint = false;
                 return;
             }
-            isConstraintAttribute = false;
             PathQuery query = queryStack.peek();
             String constraintPath = constraintPathStack.pop();
             Map<String, String> constraintAttributes = constraintAttributesStack.pop();
