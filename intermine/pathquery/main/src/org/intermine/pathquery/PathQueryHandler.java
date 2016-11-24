@@ -40,7 +40,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class PathQueryHandler extends DefaultHandler
 {
     protected final Map<String, PathQuery> queries;
-    protected String queryName;
+    //protected String queryName;
+    protected Stack<String> queryNameStack = new Stack<String>();
     //protected PathQuery query;
     protected Stack<PathQuery> queryStack = new Stack<PathQuery>();
     //protected String constraintLogic = null;
@@ -125,7 +126,7 @@ public class PathQueryHandler extends DefaultHandler
             // Do nothing
         } else if ("query".equals(qName)) {
             isConstraintAttribute = false;
-            queryName = validateName(attrs.getValue("name"));
+            queryNameStack.push(validateName(attrs.getValue("name")));
             String modelName = attrs.getValue("model");
             if (models.containsKey(modelName)) {
                 model = models.get(modelName);
@@ -436,6 +437,7 @@ public class PathQueryHandler extends DefaultHandler
                     throw new Error("Error", e);
                 }
             }
+            String queryName = queryNameStack.pop();
             if (queryStack.size() == 1) {
                 queries.put(queryName, query);
                 queryStack.pop();
@@ -470,7 +472,7 @@ public class PathQueryHandler extends DefaultHandler
             if (valueBuffer == null || valueBuffer.length() < 1) {
                 throw new NullPointerException(
                         "No value provided in value tag."
-                                + " Failed for template query: " + queryName
+                                + " Failed for template query: " + queryNameStack.peek()
                                 + " on constraint: " + constraintPathStack.peek());
             }
             constraintValues.add(valueBuffer.toString());

@@ -104,7 +104,7 @@ public class TemplateQueryHandler extends PathQueryHandler
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if ("template".equals(qName)) {
-            PathQuery query = queries.get(queryName);
+            PathQuery query = queries.get(templateName);
             TemplateQuery t = new TemplateQuery(templateName, templateTitle, templateComment,
                     query);
             t.setEditableConstraints(editableConstraints);
