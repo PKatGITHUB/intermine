@@ -42,6 +42,7 @@ public class PathQueryHandler extends DefaultHandler
     protected final Map<String, PathQuery> queries;
     //protected String queryName;
     protected Stack<String> queryNameStack = new Stack<String>();
+    protected String queryName;
     //protected PathQuery query;
     protected Stack<PathQuery> queryStack = new Stack<PathQuery>();
     //protected String constraintLogic = null;
@@ -437,7 +438,7 @@ public class PathQueryHandler extends DefaultHandler
                     throw new Error("Error", e);
                 }
             }
-            String queryName = queryNameStack.pop();
+            queryName = queryNameStack.pop();
             if (queryStack.size() == 1) {
                 queries.put(queryName, query);
                 queryStack.pop();
