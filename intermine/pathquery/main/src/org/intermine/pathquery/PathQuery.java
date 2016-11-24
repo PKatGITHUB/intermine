@@ -1762,16 +1762,17 @@ public class PathQuery implements Cloneable
                     // Do nothing
                 } else if (constraint instanceof PathConstraintSubquery) {
                     if (path.endIsAttribute()) {
-                        problems.add("Constraint " + constraint
-                                + " must not be on an attribute");
+                        problems.add("Constraint with path " + path
+                                + " must not be an attribute");
                     }
                     PathQuery subquery = ((PathConstraintSubquery) constraint).getSubquery();
                     if (subquery.getView().size() > 1) {
-                        problems.add("Multiple attributes in the subquery " + subquery);
+                        problems.add("Multiple attributes in the subquery");
                     }
                     String viewAttribute = subquery.getView().get(0);
                     Path viewAttributePath = new Path(subquery.getModel(), viewAttribute);
-                    if (!viewAttributePath.getPrefix().getEndType().equals(path.getEndType())) {
+                    if (!path.endIsAttribute() && viewAttributePath.endIsAttribute()
+                        && !viewAttributePath.getPrefix().getEndType().equals(path.getEndType())) {
                         problems.add("The type of the subquery constraint " + path
                                 + " must be the same of the type of the view (in the subquery) "
                                 + viewAttributePath);
