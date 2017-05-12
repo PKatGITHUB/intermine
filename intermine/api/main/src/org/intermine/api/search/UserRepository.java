@@ -1,5 +1,7 @@
 package org.intermine.api.search;
 
+import java.util.Iterator;
+
 /*
  * Copyright (C) 2002-2016 FlyMine
  *
@@ -48,7 +50,19 @@ public class UserRepository extends SearchRepository
 
     @Override
     protected void handlePropertyChange(PropertyChangeEvent e) {
-        dropIndex(e.getOrigin());
+        WebSearchable ws = e.getOrigin();
+        dropIndex(ws);
+        String name = ws.getName();
+        Iterator<WebSearchable> it = searchItems.iterator();
+        WebSearchable toUpdate = null;
+        while (it.hasNext()) {
+            toUpdate = it.next();
+            if (toUpdate.getName().equals(name)) {
+                break;
+            }
+        }
+        searchItems.remove(toUpdate);
+        searchItems.add(ws);
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.apache.struts.action.ActionMessages;
 import org.intermine.api.InterMineAPI;
 import org.intermine.api.profile.Profile;
 import org.intermine.api.query.WebResultsExecutor;
+import org.intermine.api.search.PropertyChangeEvent;
 import org.intermine.api.template.ApiTemplate;
 import org.intermine.api.util.NameUtil;
 import org.intermine.objectstore.ObjectStoreException;
@@ -81,6 +82,9 @@ public class CreateTemplateAction extends InterMineAction
         template.setName(tsf.getName());
         template.setTitle(tsf.getTitle());
         template.setComment(tsf.getComment());
+
+        PropertyChangeEvent event = new PropertyChangeEvent(template);
+        profile.getSearchRepository().receiveEvent(event);
 
         WebResultsExecutor webResultsExecutor = im.getWebResultsExecutor(profile);
 
