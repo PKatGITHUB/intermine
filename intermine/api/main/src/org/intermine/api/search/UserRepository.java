@@ -1,7 +1,5 @@
 package org.intermine.api.search;
 
-import java.util.Iterator;
-
 /*
  * Copyright (C) 2002-2016 FlyMine
  *
@@ -14,6 +12,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.intermine.api.profile.Profile;
+import java.util.Iterator;
 
 /**
  * A repository for searching the searchable items of a single user.
