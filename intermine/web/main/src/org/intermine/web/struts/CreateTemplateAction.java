@@ -83,9 +83,6 @@ public class CreateTemplateAction extends InterMineAction
         template.setTitle(tsf.getTitle());
         template.setComment(tsf.getComment());
 
-        /*PropertyChangeEvent event = new PropertyChangeEvent(template);
-        profile.getSearchRepository().receiveEvent(event);*/
-
         WebResultsExecutor webResultsExecutor = im.getWebResultsExecutor(profile);
 
         // Check whether query has at least one constraint and at least one output
