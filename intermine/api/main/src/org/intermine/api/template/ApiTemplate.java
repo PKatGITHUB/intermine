@@ -100,8 +100,6 @@ public class ApiTemplate extends TemplateQuery implements WebSearchable
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result
-                + ((observers == null) ? 0 : observers.hashCode());
         result = prime
                 * result
                 + ((savedTemplateQuery == null) ? 0 : savedTemplateQuery
@@ -201,5 +199,9 @@ public class ApiTemplate extends TemplateQuery implements WebSearchable
             return String.valueOf(templateRank);
         }
         return null;
+    }
+
+    public Set<WebSearchWatcher> getObservers() {
+        return observers;
     }
 }
