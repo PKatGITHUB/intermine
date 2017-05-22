@@ -782,11 +782,11 @@ public class Profile
                     + " exist: " + oldName);
         }
 
-        ApiTemplate oldTemplate = savedTemplates.remove(oldName);
+        savedTemplates.remove(oldName);
         try {
             saveTemplate(template.getName(), template);
         } catch (BadTemplateException bte) {
-            savedTemplates.put(oldName, oldTemplate);
+            savedTemplates.put(oldName, old);
             throw bte;
         }
         if (!oldName.equals(template.getName())) {
