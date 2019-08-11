@@ -22,6 +22,7 @@ import org.intermine.web.logic.export.ResponseUtil;
 import org.intermine.web.logic.widget.GraphWidget;
 import org.intermine.web.logic.widget.config.GraphWidgetConfig;
 import org.intermine.web.logic.widget.config.WidgetConfig;
+import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.exceptions.ResourceNotFoundException;
 import org.intermine.webservice.server.output.Output;
 import org.intermine.webservice.server.output.StreamedOutput;
@@ -45,8 +46,8 @@ public class GraphService extends WidgetService
     private final WidgetsRequestParser requestParser;
 
     /** @param im the InterMine state object **/
-    public GraphService(InterMineAPI im) {
-        super(im);
+    public GraphService(InterMineAPI im, Format format) {
+        super(im, format);
         requestParser = new WidgetsRequestParser();
     }
 
@@ -90,9 +91,9 @@ public class GraphService extends WidgetService
                     "Could not find a graph widget called \""
                     + input.getWidgetId() + "\"", e);
         }
-        addOutputInfo("notAnalysed", Integer.toString(widget.getNotAnalysed()));
-        addOutputInfo("simplePathQuery", widget.getSimplePathQuery().toJson());
-        addOutputInfo("pathQuery", widget.getPathQuery().toJson());
+        outputString = outputString.concat("\"notAnalysed\" : \""+widget.getNotAnalysed()+"\"").concat("\n");
+        outputString = outputString.concat("\"simplePathQuery\" : \""+widget.getSimplePathQuery().toJsonSpring()+"\"").concat("\n");
+        outputString = outputString.concat("\"pathQuery\" : \""+widget.getPathQuery().toJsonSpring()+"\"").concat("\n");
 
         addOutputResult(widget);
     }
@@ -101,7 +102,7 @@ public class GraphService extends WidgetService
     protected void addOutputConfig(WidgetConfig config) {
         super.addOutputConfig(config);
         GraphWidgetConfig graphConfig = (GraphWidgetConfig) config;
-        addOutputInfo("chartType", graphConfig.getGraphType());
+        outputString = outputString.concat("\"chartType\" : \""+graphConfig.getGraphType()+"\"").concat("\n");
         addOutputAttribute("seriesValues", graphConfig.getSeriesValues());
         addOutputAttribute("seriesLabels", graphConfig.getSeriesLabels());
         addOutputAttribute("seriesPath", graphConfig.getSeriesPath());
@@ -118,15 +119,6 @@ public class GraphService extends WidgetService
         } else {
             return FlatFileWidgetResultProcessor.instance();
         }
-    }
-
-    /**
-     * @param out The raw XML output.
-     * @return An output object.
-     */
-    protected Output makeXMLOutput(PrintWriter out) {
-        ResponseUtil.setXMLHeader(response, "result.xml");
-        return new StreamedOutput(out, new GraphXMLFormatter());
     }
 
 }

@@ -44,7 +44,7 @@ public class GraphWidgetsServlet extends HttpServlet
 
     private void runService(HttpServletRequest request, HttpServletResponse response) {
         final InterMineAPI im = InterMineContext.getInterMineAPI();
-        new GraphService(im).service(request, response);
+        //new GraphService(im).service(request, response);
     }
 
 }

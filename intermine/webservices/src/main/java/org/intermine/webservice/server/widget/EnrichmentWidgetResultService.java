@@ -67,8 +67,8 @@ public class EnrichmentWidgetResultService extends WidgetService
     private final WidgetsRequestParser requestParser;
 
     /** @param im The InterMine state object. **/
-    public EnrichmentWidgetResultService(InterMineAPI im) {
-        super(im);
+    public EnrichmentWidgetResultService(InterMineAPI im, Format format) {
+        super(im, format);
         requestParser = new WidgetsRequestParser();
         requestParser.parameterIsRequired(WidgetsRequestParser.MAXP);
         requestParser.parameterIsRequired(WidgetsRequestParser.ERROR_CORRECTION);
@@ -78,16 +78,6 @@ public class EnrichmentWidgetResultService extends WidgetService
         requestParser.setDefaultValue(
                 WidgetsRequestParser.MAXP,
                 getProperty("widgets.maxp.default"));
-    }
-
-    @Override
-    protected boolean canServe(Format format) {
-        if (format == Format.JSON
-                || format == Format.XML
-                || Format.FLAT_FILES.contains(format)) {
-            return true;
-        }
-        return false;
     }
 
     private static final String BAD_POPULATION_MSG =
@@ -155,9 +145,9 @@ public class EnrichmentWidgetResultService extends WidgetService
             throw new ResourceNotFoundException("Could not find an enrichment widget called \""
                                                + input.getWidgetId() + "\"");
         }
-        addOutputInfo("notAnalysed", Integer.toString(widget.getNotAnalysed()));
+        outputString = outputString.concat("\"notAnalysed\" : \""+widget.getNotAnalysed()+"\"").concat("\n");
         // total number of genes in database annotated with ANY GO term
-        addOutputInfo("populationCount", Integer.toString(widget.getPopulationCount()));
+        outputString = outputString.concat("\"populationCount\" : \""+widget.getPopulationCount()+"\"").concat("\n");
         addOutputPathQuery(widget, widgetConfig);
         addOutputExtraAttribute(input, widget);
 
@@ -175,9 +165,9 @@ public class EnrichmentWidgetResultService extends WidgetService
 
     private void addOutputPathQuery(EnrichmentWidget widget, WidgetConfig config) {
         // TODO: Make this a) not an effing string, and b) work equally well in XML.
-        addOutputInfo("pathQuery", widget.getPathQuery().toJson());
-        addOutputInfo("pathConstraint", widget.getPathConstraint());
-        addOutputInfo("pathQueryForMatches", widget.getPathQueryForMatches().toJson());
+        outputString = outputString.concat("\"pathQuery\" : \""+widget.getPathQuery().toJsonSpring()+"\"").concat("\n");
+        outputString = outputString.concat("\"pathConstraint\" : \""+widget.getPathConstraint()+"\"").concat("\n");
+        outputString = outputString.concat("\"pathQueryForMatches\" : \""+widget.getPathQueryForMatches().toJsonSpring()+"\"").concat("\n");
     }
 
     private void addOutputUserLogged() {
@@ -204,10 +194,10 @@ public class EnrichmentWidgetResultService extends WidgetService
             if (processor instanceof EnrichmentJSONProcessor) {
                 String jsonExtraAttribute = ((EnrichmentJSONProcessor) processor)
                                          .formatExtraAttributes(extraAttributes);
-                addOutputInfo("extraAttribute", jsonExtraAttribute);
+                outputString = outputString.concat("\"extraAttribute\" : \""+jsonExtraAttribute+"\"").concat("\n");
             }
         } else {
-            addOutputInfo("extraAttribute", null);
+            outputString = outputString.concat("\"extraAttribute\" : \""+null+"\"").concat("\n");
         }
     }
 
@@ -222,12 +212,6 @@ public class EnrichmentWidgetResultService extends WidgetService
         } else {
             return FlatFileWidgetResultProcessor.instance();
         }
-    }
-
-    @Override
-    protected Output makeXMLOutput(PrintWriter out, String separator) {
-        ResponseUtil.setXMLHeader(response, "result.xml");
-        return new StreamedOutput(out, new EnrichmentXMLFormatter(), separator);
     }
 
     private WidgetsServiceInput getInput() {
@@ -251,9 +235,9 @@ public class EnrichmentWidgetResultService extends WidgetService
         }
         if ("".equals(populationBagName)) {
             //json formatter doesn't format empty string
-            addOutputInfo(WidgetsRequestParser.POPULATION_BAG_NAME, null);
+            outputString = outputString.concat("\""+WidgetsRequestParser.POPULATION_BAG_NAME+"\" : \""+null+"\"").concat("\n");
         } else {
-            addOutputInfo(WidgetsRequestParser.POPULATION_BAG_NAME, populationBagName);
+            outputString = outputString.concat("\""+WidgetsRequestParser.POPULATION_BAG_NAME+"\" : \""+populationBagName+"\"").concat("\n");
         }
         InterMineBag populationBag = null;
         populationBag = retrieveBag(populationBagName);

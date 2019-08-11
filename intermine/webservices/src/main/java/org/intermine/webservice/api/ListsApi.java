@@ -5,20 +5,8 @@
  */
 package org.intermine.webservice.api;
 
-import org.intermine.webservice.model.JaccardIndex;
-import org.intermine.webservice.model.ListAppend;
-import org.intermine.webservice.model.ListInvitationMultiple;
-import org.intermine.webservice.model.ListInvitationSingle;
-import org.intermine.webservice.model.ListOperations;
-import org.intermine.webservice.model.ListRename;
-import org.intermine.webservice.model.ListSharingGet;
-import org.intermine.webservice.model.ListSharingPost;
-import org.intermine.webservice.model.ListsDelete;
-import org.intermine.webservice.model.ListsGet;
-import org.intermine.webservice.model.ListsPost;
+import org.intermine.webservice.model.*;
 import io.swagger.annotations.*;
-import org.intermine.webservice.model.SimpleJsonModel;
-import org.intermine.webservice.model.Tags;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -320,4 +308,74 @@ public interface ListsApi {
             method = RequestMethod.PUT)
     ResponseEntity<ListInvitationSingle> listsInvitationsUidPut(@ApiParam(value = "The identifier of the invitation - a 20 character unique string.",required=true) @PathVariable("uid") String uid,@NotNull @ApiParam(value = "Whether or not this invitation is accepted or not.", required = true) @Valid @RequestParam(value = "accepted", required = true) Boolean accepted);
 
+
+    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartGet", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/chart",
+            produces = { "application/json" },
+            method = RequestMethod.GET)
+    ResponseEntity<String> listChartGet(@NotNull @ApiParam(value = "The name of the list to investigate.", required = true) @Valid @RequestParam(value = "list", required = true) String list,
+                                           @NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,
+                                           @ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,
+                                           @ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
+
+
+    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartPost", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/chart",
+            produces = { "application/json" },
+            method = RequestMethod.POST)
+    ResponseEntity<String> listChartPost(@NotNull @ApiParam(value = "The name of the list to investigate.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
+
+
+    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentGet", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/enrichment",
+            produces = { "application/json" },
+            method = RequestMethod.GET)
+    ResponseEntity<String> listEnrichmentGet(@NotNull @ApiParam(value = "The name of the enrichment widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,
+                                                     @NotNull @ApiParam(value = "The maximum p-value of results to display. The range is 0.0 - 1.0.", required = true) @Valid @RequestParam(value = "maxp", required = true) BigDecimal maxp,
+                                                     @NotNull @ApiParam(value = "The error correction algorithm to use..", required = true, allowableValues = "Holm-Bonferroni, Benjamini and Hochberg, Bonferroni, None") @Valid @RequestParam(value = "correction", required = true) String correction,
+                                                     @ApiParam(value = "The name of the list to investigate, optional unless identifiers is NULL..") @Valid @RequestParam(value = "list", required = false) String list,
+                                                     @ApiParam(value = "Comma-separated list of InterMine object IDs, optional unless list name is NULL..") @Valid @RequestParam(value = "ids", required = false) String ids,
+                                                     @ApiParam(value = "The name of the list to use as the background population.") @Valid @RequestParam(value = "population", required = false) String population,
+                                                     @ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,
+                                                     @ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
+
+
+    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentPost", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/enrichment",
+            produces = { "application/json" },
+            method = RequestMethod.POST)
+    ResponseEntity<String> listEnrichmentPost(@NotNull @ApiParam(value = "The name of the enrichment widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,
+                                                      @NotNull @ApiParam(value = "The maximum p-value of results to display. The range is 0.0 - 1.0.", required = true) @Valid @RequestParam(value = "maxp", required = true) BigDecimal maxp,
+                                                      @NotNull @ApiParam(value = "The error correction algorithm to use..", required = true, allowableValues = "Holm-Bonferroni, Benjamini and Hochberg, Bonferroni, None") @Valid @RequestParam(value = "correction", required = true) String correction,
+                                                      @ApiParam(value = "The name of the list to investigate, optional unless identifiers is NULL..") @Valid @RequestParam(value = "list", required = false) String list,
+                                                      @ApiParam(value = "Comma-separated list of InterMine object IDs, optional unless list name is NULL..") @Valid @RequestParam(value = "ids", required = false) String ids,
+                                                      @ApiParam(value = "The name of the list to use as the background population.") @Valid @RequestParam(value = "population", required = false) String population,
+                                                      @ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,
+                                                      @ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
+
+
+    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTableGet", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/table",
+            produces = { "application/json" },
+            method = RequestMethod.GET)
+    ResponseEntity<String> listTableGet(@NotNull @ApiParam(value = "The name of the list to use as the population for the graph.", required = true) @Valid @RequestParam(value = "list", required = true) String list, @NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget, @ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
+
+
+    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTablePost", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={  })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class) })
+    @RequestMapping(value = "/list/table",
+            produces = { "application/json" },
+            method = RequestMethod.POST)
+    ResponseEntity<String> listTablePost(@NotNull @ApiParam(value = "The name of the list to use as the population for the graph.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 }

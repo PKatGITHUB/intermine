@@ -48,7 +48,7 @@ public class WidgetsServlet extends HttpServlet
         // according new data
         // and not remember fields initialized according previous request data
         final InterMineAPI im = InterMineContext.getInterMineAPI();
-        new EnrichmentWidgetResultService(im).service(request, response);
+        //new EnrichmentWidgetResultService(im).service(request, response);
     }
 
 }

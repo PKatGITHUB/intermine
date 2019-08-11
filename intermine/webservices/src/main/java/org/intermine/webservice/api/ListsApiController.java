@@ -3,24 +3,15 @@ package org.intermine.webservice.api;
 import org.apache.log4j.Logger;
 import org.intermine.api.InterMineAPI;
 import org.intermine.web.context.InterMineContext;
-import org.intermine.webservice.model.JaccardIndex;
-import org.intermine.webservice.model.ListAppend;
-import org.intermine.webservice.model.ListInvitationMultiple;
-import org.intermine.webservice.model.ListInvitationSingle;
-import org.intermine.webservice.model.ListOperations;
-import org.intermine.webservice.model.ListRename;
-import org.intermine.webservice.model.ListSharingGet;
-import org.intermine.webservice.model.ListSharingPost;
-import org.intermine.webservice.model.ListsDelete;
-import org.intermine.webservice.model.ListsGet;
-import org.intermine.webservice.model.ListsPost;
+import org.intermine.webservice.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
-import org.intermine.webservice.model.SimpleJsonModel;
-import org.intermine.webservice.model.Tags;
 import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.WebServiceRequestParser;
 import org.intermine.webservice.server.lists.*;
+import org.intermine.webservice.server.widget.EnrichmentWidgetResultService;
+import org.intermine.webservice.server.widget.GraphService;
+import org.intermine.webservice.server.widget.TableWidgetService;
 import org.intermine.webservice.util.ResponseUtilSpring;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -38,15 +29,22 @@ import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
+
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-07-16T22:35:41.810+05:30[Asia/Kolkata]")
 @Controller
 public class ListsApiController extends InterMineController implements ListsApi {
 
     private static final org.apache.log4j.Logger LOG = Logger.getLogger(ListsApiController.class);
 
-    private static final String FILE_BASE_NAME = "";
+    private static final String FILE_BASE_NAME = "result";
 
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -449,6 +447,114 @@ public class ListsApiController extends InterMineController implements ListsApi 
         setFooter(listInvitationSingle);
 
         return new ResponseEntity<ListInvitationSingle>(listInvitationSingle,httpHeaders,httpStatus);
+    }
+
+    public ResponseEntity<String> listChartGet(@NotNull @ApiParam(value = "The name of the list to investigate.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        initController();
+        return serveListChart(format);
+    }
+
+    public ResponseEntity<String> listChartPost(@NotNull @ApiParam(value = "The name of the list to investigate.", required = true) @Valid @RequestParam(value = "list", required = true) String list, @NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget, @ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter, @ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        initController();
+        return serveListChart(format);
+    }
+
+    private ResponseEntity<String> serveListChart(String format){
+        final InterMineAPI im = InterMineContext.getInterMineAPI();
+
+        setHeaders();
+        GraphService graphService = new GraphService(im, getFormat());
+        try {
+            graphService.service(request);
+        } catch (Throwable throwable) {
+            sendError(throwable);
+        }
+        String outputString = graphService.getOutputString();
+        outputString = setFooterListWidgets(outputString);
+        if(format.equals("xml")) {
+            ResponseUtilSpring.setXMLHeader(httpHeaders, FILE_BASE_NAME + ".xml");
+        }
+        return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
+    }
+
+    public ResponseEntity<String> listEnrichmentGet(@NotNull @ApiParam(value = "The name of the enrichment widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget, @NotNull @ApiParam(value = "The maximum p-value of results to display. The range is 0.0 - 1.0.", required = true) @Valid @RequestParam(value = "maxp", required = true) BigDecimal maxp, @NotNull @ApiParam(value = "The error correction algorithm to use..", required = true, allowableValues = "Holm-Bonferroni, Benjamini and Hochberg, Bonferroni, None") @Valid @RequestParam(value = "correction", required = true) String correction, @ApiParam(value = "The name of the list to investigate, optional unless identifiers is NULL..") @Valid @RequestParam(value = "list", required = false) String list, @ApiParam(value = "Comma-separated list of InterMine object IDs, optional unless list name is NULL..") @Valid @RequestParam(value = "ids", required = false) String ids, @ApiParam(value = "The name of the list to use as the background population.") @Valid @RequestParam(value = "population", required = false) String population, @ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter, @ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        String accept = request.getHeader("Accept");
+        return new ResponseEntity<String>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    public ResponseEntity<String> listEnrichmentPost(@NotNull @ApiParam(value = "The name of the enrichment widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@NotNull @ApiParam(value = "The maximum p-value of results to display. The range is 0.0 - 1.0.", required = true) @Valid @RequestParam(value = "maxp", required = true) BigDecimal maxp,@NotNull @ApiParam(value = "The error correction algorithm to use..", required = true, allowableValues = "Holm-Bonferroni, Benjamini and Hochberg, Bonferroni, None") @Valid @RequestParam(value = "correction", required = true) String correction,@ApiParam(value = "The name of the list to investigate, optional unless identifiers is NULL..") @Valid @RequestParam(value = "list", required = false) String list,@ApiParam(value = "Comma-separated list of InterMine object IDs, optional unless list name is NULL..") @Valid @RequestParam(value = "ids", required = false) String ids,@ApiParam(value = "The name of the list to use as the background population.") @Valid @RequestParam(value = "population", required = false) String population,@ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,@ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        initController();
+        return serveListEnrichment(format);
+    }
+
+    private ResponseEntity<String> serveListEnrichment(String format){
+        final InterMineAPI im = InterMineContext.getInterMineAPI();
+
+        setHeaders();
+        EnrichmentWidgetResultService enrichmentWidgetResultService = new EnrichmentWidgetResultService(im, getFormat());
+        try {
+            enrichmentWidgetResultService.service(request);
+        } catch (Throwable throwable) {
+            sendError(throwable);
+        }
+        String outputString = enrichmentWidgetResultService.getOutputString();
+        outputString = setFooterListWidgets(outputString);
+        if(format.equals("xml")) {
+            ResponseUtilSpring.setXMLHeader(httpHeaders, FILE_BASE_NAME + ".xml");
+        } else if(format.equals("tab")) {
+            ResponseUtilSpring.setTabHeader(httpHeaders, FILE_BASE_NAME + ".tsv");
+        } else if(format.equals("csv")) {
+            ResponseUtilSpring.setCSVHeader(httpHeaders, FILE_BASE_NAME + ".csv");
+        }
+        return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
+    }
+
+
+
+    public ResponseEntity<String> listTableGet(@NotNull @ApiParam(value = "The name of the list to use as the population for the graph.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        initController();
+        return serveListTable(format);
+    }
+
+    public ResponseEntity<String> listTablePost(@NotNull @ApiParam(value = "The name of the list to use as the population for the graph.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
+        initController();
+        return serveListTable(format);
+    }
+
+    private ResponseEntity<String> serveListTable(String format){
+        final InterMineAPI im = InterMineContext.getInterMineAPI();
+
+        setHeaders();
+        TableWidgetService tableWidgetService = new TableWidgetService(im, getFormat());
+        try {
+            tableWidgetService.service(request);
+        } catch (Throwable throwable) {
+            sendError(throwable);
+        }
+        String outputString = tableWidgetService.getOutputString();
+        outputString = setFooterListWidgets(outputString);
+        if(format.equals("xml")) {
+            ResponseUtilSpring.setXMLHeader(httpHeaders, FILE_BASE_NAME + ".xml");
+        }
+        return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
+    }
+
+    public String setFooterListWidgets(String outputString){
+        Date now = Calendar.getInstance().getTime();
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd HH:mm::ss");
+        String executionTime = dateFormatter.format(now);
+        outputString = outputString.concat("\"executionTime\" : \""+executionTime+"\"").concat("\n");
+
+
+        if (status >= 400) {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+false+"\"").concat("\n");
+            outputString = outputString.concat("\"error\" : \""+escapeJava(errorMessage)+"\"").concat("\n");
+        } else {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+true+"\"").concat("\n");
+        }
+        outputString = outputString.concat("\"statusCode\" : \""+status+"\"").concat("\n");
+        outputString = outputString.concat("}");
+        return outputString;
     }
 
     @Override

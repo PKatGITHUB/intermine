@@ -22,6 +22,7 @@ import org.intermine.web.logic.config.WebConfig;
 import org.intermine.web.logic.widget.TableWidget;
 import org.intermine.web.logic.widget.config.TableWidgetConfig;
 import org.intermine.web.logic.widget.config.WidgetConfig;
+import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.exceptions.ServiceException;
 import org.intermine.webservice.server.exceptions.ResourceNotFoundException;
 
@@ -41,8 +42,8 @@ public class TableWidgetService extends WidgetService
      * Construct a TableWidgetService
      * @param im the intermine  API object
      */
-    public TableWidgetService(InterMineAPI im) {
-        super(im);
+    public TableWidgetService(InterMineAPI im, Format format) {
+        super(im, format);
         requestParser = new WidgetsRequestParser();
     }
 
@@ -70,12 +71,12 @@ public class TableWidgetService extends WidgetService
             twc.setClassKeys(classKeys);
             widget = twc.getWidget(imBag, null, im.getObjectStore(), input, ids, populationIds);
             widget.process();
-            addOutputInfo("columns", StringUtils.join(widget.getColumns().toArray(), ","));
+            outputString = outputString.concat("\"columns\" : \""+StringUtils.join(widget.getColumns().toArray(), ",")+"\"").concat("\n");
         } catch (ClassCastException e) {
             throw new ResourceNotFoundException("Could not find a table widget called \""
                     + input.getWidgetId() + "\"", e);
         }
-        addOutputInfo("notAnalysed", Integer.toString(widget.getNotAnalysed()));
+        outputString = outputString.concat("\"notAnalysed\" : \""+widget.getNotAnalysed()+"\"").concat("\n");
         addOutputPathQuery(widget, widgetConfig);
         try {
             addOutputResult(widget);
@@ -87,7 +88,7 @@ public class TableWidgetService extends WidgetService
     @Override
     protected void addOutputConfig(WidgetConfig config) {
         super.addOutputConfig(config);
-        addOutputInfo("columnTitle", ((TableWidgetConfig) config).getColumnTitle());
+        outputString = outputString.concat("\"columnTitle\" : \""+((TableWidgetConfig) config).getColumnTitle()+"\"").concat("\n");
     }
 
     /**
@@ -96,7 +97,7 @@ public class TableWidgetService extends WidgetService
      * @param config the table config
      */
     private void addOutputPathQuery(TableWidget widget, WidgetConfig config) {
-        addOutputInfo("pathQuery", widget.getPathQuery().toJson());
+        outputString = outputString.concat("\"pathQuery\" : \""+widget.getPathQuery().toJsonSpring()+"\"").concat("\n");
         TableWidgetConfig tableWidgetConfig = (TableWidgetConfig) config;
         String pathStrings = tableWidgetConfig.getPathStrings();
         if (pathStrings.contains("[") && pathStrings.contains("]")) {
@@ -104,7 +105,7 @@ public class TableWidgetService extends WidgetService
                           + pathStrings.substring(pathStrings.indexOf("]") + 1);
         }
         String prefix =  pathStrings + ".";
-        addOutputInfo("pathConstraint", prefix + "id");
+        outputString = outputString.concat("\"pathConstraint\" : \""+prefix+"\"").concat("\n");
     }
 
     @Override

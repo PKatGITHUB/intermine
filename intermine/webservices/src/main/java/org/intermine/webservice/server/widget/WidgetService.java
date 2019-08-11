@@ -10,6 +10,9 @@ package org.intermine.webservice.server.widget;
  *
  */
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,22 +25,33 @@ import org.intermine.api.profile.InterMineBag;
 import org.intermine.api.profile.Profile;
 import org.intermine.web.logic.widget.Widget;
 import org.intermine.web.logic.widget.config.WidgetConfig;
+import org.intermine.webservice.JSONServiceSpring;
+import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.core.JSONService;
 import org.intermine.webservice.server.exceptions.BadRequestException;
 import org.intermine.webservice.server.output.JSONFormatter;
 
+import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
+
 /**
  * @author dbutano
  */
-public abstract class WidgetService extends JSONService
+public abstract class WidgetService extends JSONServiceSpring
 {
+
+    public String getOutputString() {
+        return outputString;
+    }
+
+    protected String outputString;
 
     /**
      * Construct the webservice controller.
      * @param im The API object.
      */
-    public WidgetService(InterMineAPI im) {
-        super(im);
+    public WidgetService(InterMineAPI im, Format format) {
+        super(im, format);
+        this.outputString = "{\n";
     }
 
     /**
@@ -64,7 +78,7 @@ public abstract class WidgetService extends JSONService
      */
     protected void addOutputAttribute(String label, String value) {
         if (StringUtils.isNotBlank(value)) {
-            addOutputInfo(label, value);
+            outputString = outputString.concat("\""+label+"\" : \""+value+"\"").concat("\n");
         }
     }
 
@@ -75,12 +89,12 @@ public abstract class WidgetService extends JSONService
     @SuppressWarnings("deprecation")
     protected void addOutputListInfo(InterMineBag imBag) {
         if (imBag != null) {
-            addOutputInfo("type", imBag.getType());
-            addOutputInfo("list", imBag.getName());
+            outputString = outputString.concat("\"type\" : \""+imBag.getType()+"\"").concat("\n");
+            outputString = outputString.concat("\"list\" : \""+imBag.getName()+"\"").concat("\n");
         }
 
         // TODO: remove requestedAt - we already output this info.
-        addOutputInfo("requestedAt", new Date().toGMTString());
+        outputString = outputString.concat("\"requestedAt\" : \""+(new Date().toGMTString())+"\"").concat("\n");
     }
 
     /**
@@ -91,10 +105,10 @@ public abstract class WidgetService extends JSONService
      */
     protected void addOutputIdsInfo(String ids, String populationIds) {
         if (ids != null) {
-            addOutputInfo("ids", ids);
+            outputString = outputString.concat("\"ids\" : \""+populationIds+"\"").concat("\n");
         }
         if (populationIds != null) {
-            addOutputInfo("populationIds", populationIds);
+            outputString = outputString.concat("\"populationIds\" : \""+populationIds+"\"").concat("\n");
         }
     }
 
@@ -135,31 +149,22 @@ public abstract class WidgetService extends JSONService
     protected void addOutputResult(Widget widget) throws Exception {
         WidgetResultProcessor processor = getProcessor();
         Iterator<List<Object>> it = widget.getResults().iterator();
+        outputString = outputString.concat("\"results\" : [").concat("\n");
         while (it.hasNext()) {
             List<Object> row = it.next();
             List<String> processed = processor.formatRow(row);
             if (formatIsJSON() && it.hasNext()) {
                 processed.add(""); // TODO: this idiom is dumb. Expunge.
             }
-            output.addResultItem(processed);
+            outputString = outputString.concat(processed.toString() + ",").concat("\n");
         }
+        outputString = outputString.concat("]");
     }
 
     /**
      * @return A widget result processor for outputting results.
      */
     protected abstract WidgetResultProcessor getProcessor();
-
-    @Override
-    protected Map<String, Object> getHeaderAttributes() {
-        final Map<String, Object> attributes = new HashMap<String, Object>();
-        attributes.putAll(super.getHeaderAttributes());
-        if (formatIsJSON()) {
-            attributes.put(JSONFormatter.KEY_INTRO, "\"results\":[");
-            attributes.put(JSONFormatter.KEY_OUTRO, "]");
-        }
-        return attributes;
-    }
 
     private List<String> cachedFilters = null;
 
@@ -186,4 +191,6 @@ public abstract class WidgetService extends JSONService
         }
         return defaultValue;
     }
+
+
 }
