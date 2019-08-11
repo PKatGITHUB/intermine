@@ -28,8 +28,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-06-22T06:09:52.181+05:30[Asia/Kolkata]")
 @Controller
@@ -104,31 +110,31 @@ public class QueryApiDefaultJsonController extends InterMineController implement
             sendError(throwable);
         }
         if(format.equals("json")){
-
-            QueryResultsJson queryResultsJson = queryResultService.getQueryResultsJson();
+            String outputString = queryResultService.getOutputString();
+            //QueryResultsJson queryResultsJson = queryResultService.getQueryResultsJson();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJson);
-            return new ResponseEntity<QueryResultsJson>(queryResultsJson,httpHeaders,httpStatus);
+            outputString = setFooterQueryResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
 
         } else if(format.equals("jsonobject")) {
-
-            QueryResultsJsonObject queryResultsJsonObject = queryResultService.getQueryResultsJsonObject();
+            String outputString = queryResultService.getOutputString();
+            //QueryResultsJsonObject queryResultsJsonObject = queryResultService.getQueryResultsJsonObject();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJsonObject);
-            return new ResponseEntity<QueryResultsJsonObject>(queryResultsJsonObject,httpHeaders,httpStatus);
+            outputString = setFooterQueryResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
 
         } else if(format.equals("jsoncount")) {
-
-            QueryResultsJsonCount queryResultsJsonCount = queryResultService.getQueryResultsJsonCount();
+            String outputString = queryResultService.getCountString();
+            //QueryResultsJsonCount queryResultsJsonCount = queryResultService.getQueryResultsJsonCount();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJsonCount);
-            return new ResponseEntity<QueryResultsJsonCount>(queryResultsJsonCount,httpHeaders,httpStatus);
+            outputString = setFooterQueryResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
 
         } else if(format.equals("count")) {
-
-            QueryResultsJsonCount queryResultsJsonCount = queryResultService.getQueryResultsJsonCount();
+            String outputString = queryResultService.getCountString();
+            //QueryResultsJsonCount queryResultsJsonCount = queryResultService.getQueryResultsJsonCount();
             ResponseUtilSpring.setPlainTextHeader(httpHeaders, "results");
-            return new ResponseEntity<Integer>(queryResultsJsonCount.getCount(),httpHeaders,httpStatus);
+            return new ResponseEntity<Integer>(Integer.parseInt(outputString),httpHeaders,httpStatus);
 
         } else if(format.equals("tab")) {
             ResponseUtilSpring.setTabHeader(httpHeaders, "results.tsv");
@@ -140,8 +146,9 @@ public class QueryApiDefaultJsonController extends InterMineController implement
             ResponseUtilSpring.setXMLHeader(httpHeaders, "results.xml");
 
         }
-        QueryResultsJsonObject queryResultsJsonObject = queryResultService.getQueryResultsJsonObject();
-        return new ResponseEntity<Object>(queryResultsJsonObject.getResults(),httpHeaders,httpStatus);
+        String outputString = queryResultService.getResultsString();
+        //QueryResultsJsonObject queryResultsJsonObject = queryResultService.getQueryResultsJsonObject();
+        return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
     }
 
 
@@ -205,6 +212,24 @@ public class QueryApiDefaultJsonController extends InterMineController implement
         }
         ResponseUtilSpring.setPlainTextHeader(httpHeaders,"results.txt");
         return new ResponseEntity<Integer>(toList.getListSize(),httpHeaders,httpStatus);
+    }
+
+    public String setFooterQueryResults(String outputString){
+        Date now = Calendar.getInstance().getTime();
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd HH:mm::ss");
+        String executionTime = dateFormatter.format(now);
+        outputString = outputString.concat("\"executionTime\" : \""+executionTime+"\"").concat("\n");
+
+
+        if (status >= 400) {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+false+"\"").concat("\n");
+            outputString = outputString.concat("\"error\" : \""+escapeJava(errorMessage)+"\"").concat("\n");
+        } else {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+true+"\"").concat("\n");
+        }
+        outputString = outputString.concat("\"statusCode\" : \""+status+"\"").concat("\n");
+        outputString = outputString.concat("}");
+        return outputString;
     }
 
     @Override

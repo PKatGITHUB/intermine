@@ -38,6 +38,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2019-06-19T01:19:48.599+05:30[Asia/Kolkata]")
 @Controller
@@ -109,31 +115,29 @@ public class TemplatesApiDefaultJsonController extends InterMineController imple
             sendError(throwable);
         }
         if(format.equals("json")){
-
-            QueryResultsJson queryResultsJson = templateResultService.getQueryResultsJson();
+            String outputString = templateResultService.getOutputString();
+            //QueryResultsJson queryResultsJson = templateResultService.getQueryResultsJson();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJson);
-            return new ResponseEntity<QueryResultsJson>(queryResultsJson,httpHeaders,httpStatus);
+            outputString = setFooterTemplateResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
 
         } else if(format.equals("jsonobject")) {
-
-            QueryResultsJsonObject queryResultsJsonObject = templateResultService.getQueryResultsJsonObject();
+            String outputString = templateResultService.getOutputString();
+            //QueryResultsJsonObject queryResultsJsonObject = templateResultService.getQueryResultsJsonObject();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJsonObject);
-            return new ResponseEntity<QueryResultsJsonObject>(queryResultsJsonObject,httpHeaders,httpStatus);
-
+            outputString = setFooterTemplateResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
         } else if(format.equals("jsoncount")) {
-
-            QueryResultsJsonCount queryResultsJsonCount = templateResultService.getQueryResultsJsonCount();
+            String outputString = templateResultService.getCountString();
+            //QueryResultsJsonCount queryResultsJsonCount = templateResultService.getQueryResultsJsonCount();
             ResponseUtilSpring.setJSONHeader(httpHeaders, "results.json", false);
-            setFooter(queryResultsJsonCount);
-            return new ResponseEntity<QueryResultsJsonCount>(queryResultsJsonCount,httpHeaders,httpStatus);
-
+            outputString = setFooterTemplateResults(outputString);
+            return new ResponseEntity<String>(outputString,httpHeaders,httpStatus);
         } else if(format.equals("count")) {
-
-            QueryResultsJsonCount queryResultsJsonCount = templateResultService.getQueryResultsJsonCount();
+            String outputString = templateResultService.getCountString();
+            //QueryResultsJsonCount queryResultsJsonCount = templateResultService.getQueryResultsJsonCount();
             ResponseUtilSpring.setPlainTextHeader(httpHeaders, "results");
-            return new ResponseEntity<Integer>(queryResultsJsonCount.getCount(),httpHeaders,httpStatus);
+            return new ResponseEntity<Integer>(Integer.parseInt(outputString),httpHeaders,httpStatus);
 
         } else if(format.equals("tab")) {
             ResponseUtilSpring.setTabHeader(httpHeaders, "results.tsv");
@@ -145,8 +149,9 @@ public class TemplatesApiDefaultJsonController extends InterMineController imple
             ResponseUtilSpring.setXMLHeader(httpHeaders, "results.xml");
 
         }
-        QueryResultsJsonObject queryResultsJsonObject = templateResultService.getQueryResultsJsonObject();
-        return new ResponseEntity<Object>(queryResultsJsonObject.getResults(),httpHeaders,httpStatus);
+        //QueryResultsJsonObject queryResultsJsonObject = templateResultService.getQueryResultsJsonObject();
+        String outputString = templateResultService.getResultsString();
+        return new ResponseEntity<Object>(outputString,httpHeaders,httpStatus);
     }
 
     public ResponseEntity<?> templateToListGet(@NotNull @ApiParam(value = "The name of the template to run.", required = true) @Valid @RequestParam(value = "name", required = true) String name,@NotNull @ApiParam(value = "The path to use to compose the results. This should be one of the selected view paths.", required = true) @Valid @RequestParam(value = "path", required = true) String path,@NotNull @ApiParam(value = "The name for the new list. There must be no existing list of this name.", required = true) @Valid @RequestParam(value = "listName", required = true) String listName,@ApiParam(value = "One of a variable set of parameters used to supply constraint paths.") @Valid @RequestParam(value = "constraint1", required = false) String constraint1,@ApiParam(value = "One of a variable set of parameters used to supply constraint operators.") @Valid @RequestParam(value = "op1", required = false) String op1,@ApiParam(value = "One of a variable set of parameters used to supply constraint values.") @Valid @RequestParam(value = "value1", required = false) String value1,@ApiParam(value = "One of a variable set of parameters used to supply constraint codes. Codes are only required if two constraints have the same path.") @Valid @RequestParam(value = "code1", required = false) String code1,@ApiParam(value = "One of a variable set of parameters used to supply extra constraint values (used by LOOKUP constraints).") @Valid @RequestParam(value = "extra1", required = false) String extra1,@ApiParam(value = "A description to attach to the new list.") @Valid @RequestParam(value = "description", required = false) String description,@ApiParam(value = "A set of tags to use to categorise the new list separated by semicolon(;).") @Valid @RequestParam(value = "tags", required = false) String tags,@ApiParam(value = "Whether or not to replace any existing list of this name.") @Valid @RequestParam(value = "replaceExisting", required = false, defaultValue = "false") Boolean replaceExisting,@ApiParam(value = "", allowableValues = "json, text") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format) {
@@ -178,6 +183,24 @@ public class TemplatesApiDefaultJsonController extends InterMineController imple
         }
         ResponseUtilSpring.setPlainTextHeader(httpHeaders,"results.txt");
         return new ResponseEntity<Integer>(toList.getListSize(),httpHeaders,httpStatus);
+    }
+
+    public String setFooterTemplateResults(String outputString){
+        Date now = Calendar.getInstance().getTime();
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy.MM.dd HH:mm::ss");
+        String executionTime = dateFormatter.format(now);
+        outputString = outputString.concat("\"executionTime\" : \""+executionTime+"\"").concat("\n");
+
+
+        if (status >= 400) {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+false+"\"").concat("\n");
+            outputString = outputString.concat("\"error\" : \""+escapeJava(errorMessage)+"\"").concat("\n");
+        } else {
+            outputString = outputString.concat("\"wasSuccessful\" : \""+true+"\"").concat("\n");
+        }
+        outputString = outputString.concat("\"statusCode\" : \""+status+"\"").concat("\n");
+        outputString = outputString.concat("}");
+        return outputString;
     }
 
     @Override
