@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.intermine.pathquery.Constraints.eq;
 import static org.intermine.webservice.server.jbrowse.Queries.pathQueryToOSQ;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -118,15 +118,8 @@ public class Engine extends CommandRunner
                 STATS_CACHE.put(command, stats);
             }
         }
-        sendMap(stats);
-    }
-
-    private void sendMap(Map<String, Object> map) {
-        Iterator<Entry<String, Object>> it = map.entrySet().iterator();
-        while (it.hasNext()) {
-            Entry<String, Object> e = it.next();
-            onData(e, it.hasNext());
-        }
+        jBrowseFeatureStats.setFeatureDensity(stats.get("featureDensity"));
+        jBrowseFeatureStats.setFeatureCount(stats.get("featureCount"));
     }
 
     @Override
@@ -139,7 +132,7 @@ public class Engine extends CommandRunner
 
         while (it.hasNext()) {
             FastPathObject fpo = (FastPathObject) it.next();
-            onData(makeReferenceFeature(fpo, start, end), it.hasNext());
+            jBrowseFeatures.addFeaturesItem(makeReferenceFeature(fpo, start, end));
         }
     }
 
@@ -151,7 +144,7 @@ public class Engine extends CommandRunner
 
             while (it.hasNext()) {
                 FastPathObject fpo = (FastPathObject) it.next();
-                onData(makeFeatureWithSubFeatures(fpo), it.hasNext());
+                jBrowseFeatures.addFeaturesItem(makeFeatureWithSubFeatures(fpo));
             }
         }
     }
@@ -219,7 +212,6 @@ public class Engine extends CommandRunner
         }
         double mean = Double.valueOf(sum) / results.size();
 
-        Map<String, Object> result = new HashMap<String, Object>();
         Map<String, Number> binStats = new HashMap<String, Number>();
         Integer currentMax = 0;
         if (command.getSegment() != Segment.NEGATIVE_SEGMENT) {
@@ -238,9 +230,8 @@ public class Engine extends CommandRunner
         binStats.put("max", (currentMax != null && max < currentMax) ? currentMax : max);
         binStats.put("mean", mean);
 
-        result.put("bins", results);
-        result.put("stats", binStats);
-        sendMap(result);
+        jBrowseFeatureDensityStats.setBins(results);
+        jBrowseFeatureDensityStats.setStats(binStats);
     }
 
     //------------ PRIVATE METHODS --------------------//

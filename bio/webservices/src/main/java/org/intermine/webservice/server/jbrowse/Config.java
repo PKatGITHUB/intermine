@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.intermine.api.InterMineAPI;
 import org.intermine.metadata.ClassDescriptor;
 import org.intermine.metadata.Model;
@@ -36,6 +37,10 @@ import org.intermine.pathquery.PathQuery;
 import org.intermine.web.context.InterMineContext;
 import org.intermine.web.logic.WebCoreUtil;
 import org.intermine.web.logic.config.WebConfig;
+import org.intermine.webservice.JSONServiceSpring;
+import org.intermine.webservice.api.ModelApiController;
+import org.intermine.webservice.model.JBrowseConfigTrackList;
+import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.core.JSONService;
 import org.intermine.webservice.server.exceptions.ResourceNotFoundException;
 import org.intermine.webservice.server.exceptions.ServiceException;
@@ -65,8 +70,9 @@ import org.intermine.webservice.server.output.StreamedOutput;
  * @author Alex Kalderimis
  *
  */
-public class Config extends JSONService
+public class Config extends JSONServiceSpring
 {
+
     /**
      * The domain we are operating within.
      * This will generally refer to an organism, but this can
@@ -114,19 +120,35 @@ public class Config extends JSONService
     /** The base-url of this service **/
     private String baseurl = null;
 
+    private List<Object> refSeqResult;
+
+    public List<Object> getRefSeqResult() {
+        return refSeqResult;
+    }
+
+    public JBrowseConfigTrackList getjBrowseConfigTrackList() {
+        return jBrowseConfigTrackList;
+    }
+
+    private JBrowseConfigTrackList jBrowseConfigTrackList;
+
     /** A reference to the web-app configuration. **/
     WebConfig config;
 
     /** One of the files we serve: seq/refSeqs.json **/
-    private static final String REF_SEQS = "seq/refSeqs.json";
+    private static final String REF_SEQS = "refSeqs.json";
     /** One of the files we serve: trackList.json **/
     private static final String TRACKS = "trackList.json";
 
     /** Build a new instance with the injected API
      * @param im InterMine API
      * **/
-    public Config(InterMineAPI im) {
-        super(im);
+    public Config(InterMineAPI im, Format format, String fileName, String domain) {
+        super(im, format);
+        this.refSeqResult = new ArrayList<>();
+        this.jBrowseConfigTrackList = new JBrowseConfigTrackList();
+        this.fileName = fileName;
+        this.domain = domain;
     }
 
     /** Get the prefix used to namespace this service **/
@@ -153,17 +175,7 @@ public class Config extends JSONService
         featureCat     = namespaced.getProperty("feature.category");
         referenceKey   = namespaced.getProperty("reference.key");
 
-        String pathInfo = StringUtils.defaultString(request.getPathInfo(), "/")
-                                     .trim()
-                                     .substring(1);
-        String[] parts = pathInfo.split("/", 2);
 
-        if (parts.length != 2) {
-            throw new ResourceNotFoundException("NOT FOUND");
-        }
-
-        domain = parts[0];
-        fileName = parts[1];
         dataset = webProperties.getProperty("project.title") + "-" + domain;
 
         /*
@@ -265,17 +277,6 @@ public class Config extends JSONService
     }
 
     @Override
-    protected Output makeJSONOutput(PrintWriter out, String separator) {
-        Formatter f;
-        if (REF_SEQS.equals(fileName)) {
-            f = new ArrayFormatter(); // This should be an array.
-        } else {
-            f = new ObjectFormatter(); // This should be an object.
-        }
-        return new StreamedOutput(out, f, separator);
-    }
-
-    @Override
     protected void execute() throws ServiceException {
         if (REF_SEQS.equals(fileName)) {
             serveRefSeqs();
@@ -296,12 +297,12 @@ public class Config extends JSONService
      * </ul>
      */
     private void serveTrackList() {
-        addResultEntry("tracks", tracks, true);
+        jBrowseConfigTrackList.setTracks(tracks);
         Map<String, Object> nameConf = new HashMap<String, Object>();
         nameConf.put("url", getBaseUrl() + "names/" + domain);
         nameConf.put("type", "REST");
-        addResultEntry("names", nameConf, true);
-        addResultEntry("dataset_id", dataset, false);
+        jBrowseConfigTrackList.setNames(nameConf);
+        jBrowseConfigTrackList.setDatasetId(dataset);
     }
 
     /**
@@ -436,7 +437,7 @@ public class Config extends JSONService
         while (it.hasNext()) {
             FastPathObject o = (FastPathObject) it.next();
             Map<String, Object> refseq = makeRefSeq(o);
-            addResultItem(refseq, it.hasNext());
+            refSeqResult.add(refseq);
         }
     }
 
