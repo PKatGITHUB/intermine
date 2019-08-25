@@ -309,7 +309,7 @@ public interface ListsApi {
     ResponseEntity<ListInvitationSingle> listsInvitationsUidPut(@ApiParam(value = "The identifier of the invitation - a 20 character unique string.",required=true) @PathVariable("uid") String uid,@NotNull @ApiParam(value = "Whether or not this invitation is accepted or not.", required = true) @Valid @RequestParam(value = "accepted", required = true) Boolean accepted);
 
 
-    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartGet", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartGet", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={ "Graphical Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/chart",
@@ -321,7 +321,7 @@ public interface ListsApi {
                                            @ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 
 
-    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartPost", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data to produce a graph.", nickname = "listChartPost", notes = "This service returns data that can be passed to charting software, such      as Google's javascript Charts API, to produce graphical representations      of the overview of data in a list.", response = String.class, tags={ "Graphical Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/chart",
@@ -330,7 +330,7 @@ public interface ListsApi {
     ResponseEntity<String> listChartPost(@NotNull @ApiParam(value = "The name of the list to investigate.", required = true) @Valid @RequestParam(value = "list", required = true) String list,@NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget,@ApiParam(value = "An optional filter that some widgets accept.") @Valid @RequestParam(value = "filter", required = false) String filter,@ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 
 
-    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentGet", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentGet", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={ "Enrichment Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/enrichment",
@@ -346,7 +346,7 @@ public interface ListsApi {
                                                      @ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 
 
-    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentPost", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data for a given enrichment widget.", nickname = "listEnrichmentPost", notes = "Enrichment widgets provide a statistical summary of what makes a list distinct from         the background population over a certain domain. They return a list of members of the         domain ranked by p-value (low to high).", response = String.class, tags={ "Enrichment Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/enrichment",
@@ -362,7 +362,7 @@ public interface ListsApi {
                                                       @ApiParam(value = "", allowableValues = "json, xml, tab, csv") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 
 
-    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTableGet", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTableGet", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={ "Table Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/table",
@@ -371,7 +371,7 @@ public interface ListsApi {
     ResponseEntity<String> listTableGet(@NotNull @ApiParam(value = "The name of the list to use as the population for the graph.", required = true) @Valid @RequestParam(value = "list", required = true) String list, @NotNull @ApiParam(value = "The name of the graphical widget to display.", required = true) @Valid @RequestParam(value = "widget", required = true) String widget, @ApiParam(value = "", allowableValues = "json, xml") @Valid @RequestParam(value = "format", required = false, defaultValue = "json") String format);
 
 
-    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTablePost", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={  })
+    @ApiOperation(value = "Get the data as displayed by a table widget.", nickname = "listTablePost", notes = "This service returns data to produce a table representations       of the overview of data in a list", response = String.class, tags={ "Table Widgets" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/table",

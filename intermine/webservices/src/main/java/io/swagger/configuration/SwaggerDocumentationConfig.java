@@ -97,8 +97,22 @@ public class SwaggerDocumentationConfig {
                         new Tag("List Union", ""),
                         new Tag("List Substraction", ""),
                         new Tag("List Intersection", ""),
-                        new Tag("List Difference", "")
-                        )
+                        new Tag("List Difference", ""),
+                        new Tag("Graphical Widgets", ""),
+                        new Tag("Table Widgets", ""),
+                        new Tag("Enrichment Widgets", ""),
+                        new Tag("GFF3 Query Results", ""),
+                        new Tag("List as GFF3", ""),
+                        new Tag("List as FASTA", ""),
+                        new Tag("FASTA Query Results", ""),
+                        new Tag("BED Query Results", ""),
+                        new Tag("Create List from Genomic Intervals", ""),
+                        new Tag("Genomic Intervals as GFF3", ""),
+                        new Tag("Genomic Intervals as FASTA", ""),
+                        new Tag("Genomic Intervals as BED", ""),
+                        new Tag("JBrowse Configuration Files", ""),
+                        new Tag("JBrowse Endpoint", ""),
+                        new Tag("JBrowse Name Lookup", ""))
                 .select()
                     .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
                     .build()

@@ -25,7 +25,7 @@ import java.util.Map;
 @Api(value = "list", description = "the list API")
 public interface BioListApi {
 
-    @ApiOperation(value = "Get the Contents of a List as FASTA..", nickname = "listResultsFastaGet", notes = "This service allows users to export the contents of a list of `SequenceFeature`s or `Protein`s as [FASTA](http://en.wikipedia.org/wiki/FASTA_format)", response = String.class, tags={  })
+    @ApiOperation(value = "Get the Contents of a List as FASTA..", nickname = "listResultsFastaGet", notes = "This service allows users to export the contents of a list of `SequenceFeature`s or `Protein`s as [FASTA](http://en.wikipedia.org/wiki/FASTA_format)", response = String.class, tags={ "List as FASTA" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/results/fasta",
@@ -34,7 +34,7 @@ public interface BioListApi {
     ResponseEntity<String> listResultsFastaGet(@NotNull @ApiParam(value = "The name of the list.", required = true) @Valid @RequestParam(value = "list", required = true) String list);
 
 
-    @ApiOperation(value = "Get the Contents of a List as FASTA..", nickname = "listResultsFastaPost", notes = "This service allows users to export the contents of a list of `SequenceFeature`s or `Protein`s as [FASTA](http://en.wikipedia.org/wiki/FASTA_format)", response = String.class, tags={  })
+    @ApiOperation(value = "Get the Contents of a List as FASTA..", nickname = "listResultsFastaPost", notes = "This service allows users to export the contents of a list of `SequenceFeature`s or `Protein`s as [FASTA](http://en.wikipedia.org/wiki/FASTA_format)", response = String.class, tags={ "List as FASTA" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/results/fasta",
@@ -43,7 +43,7 @@ public interface BioListApi {
     ResponseEntity<String> listResultsFastaPost(@NotNull @ApiParam(value = "The name of the list.", required = true) @Valid @RequestParam(value = "list", required = true) String list);
 
 
-    @ApiOperation(value = "Get the Contents of a List as GFF3.", nickname = "listResultsGff3Get", notes = "This service allows users to export the contents of a list     of `SequenceFeature`s as GFF3.", response = String.class, tags={  })
+    @ApiOperation(value = "Get the Contents of a List as GFF3.", nickname = "listResultsGff3Get", notes = "This service allows users to export the contents of a list     of `SequenceFeature`s as GFF3.", response = String.class, tags={ "List as GFF3" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/results/gff3",
@@ -52,7 +52,7 @@ public interface BioListApi {
     ResponseEntity<String> listResultsGff3Get(@NotNull @ApiParam(value = "The name of the list.", required = true) @Valid @RequestParam(value = "list", required = true) String list);
 
 
-    @ApiOperation(value = "Get the Contents of a List as GFF3.", nickname = "listResultsGff3Post", notes = "This service allows users to export the contents of a list     of `SequenceFeature`s as GFF3.", response = String.class, tags={  })
+    @ApiOperation(value = "Get the Contents of a List as GFF3.", nickname = "listResultsGff3Post", notes = "This service allows users to export the contents of a list     of `SequenceFeature`s as GFF3.", response = String.class, tags={ "List as GFF3" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = String.class) })
     @RequestMapping(value = "/list/results/gff3",

@@ -28,7 +28,7 @@ import java.util.Map;
 @Api(value = "jbrowse", description = "the jbrowse API")
 public interface JbrowseApi {
 
-    @ApiOperation(value = "Get the Configuration for the Reference Sequences.", nickname = "jBrowseConfigRefSeqs", notes = "This service serves a `refSeqs.json` file suitable for use with JBrowse. See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = Object.class, responseContainer = "List", tags={  })
+    @ApiOperation(value = "Get the Configuration for the Reference Sequences.", nickname = "jBrowseConfigRefSeqs", notes = "This service serves a `refSeqs.json` file suitable for use with JBrowse. See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = Object.class, responseContainer = "List", tags={ "JBrowse Configuration Files" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = Object.class, responseContainer = "List") })
     @RequestMapping(value = "/jbrowse/config/{domain}/seq/refSeqs.json",
@@ -37,7 +37,7 @@ public interface JbrowseApi {
     ResponseEntity<?> jBrowseConfigRefSeqs(@ApiParam(value = "The domain we are operating in. This will generally refer to an organism taxon-id.", required = true) @PathVariable("domain") String domain);
 
 
-    @ApiOperation(value = "Get the Configuration for the Track Listing.", nickname = "jBrowseConfigTrackList", notes = "This service serves a `trackList.json` file suitable for use with JBrowse. See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services).", response = JBrowseConfigTrackList.class, tags={  })
+    @ApiOperation(value = "Get the Configuration for the Track Listing.", nickname = "jBrowseConfigTrackList", notes = "This service serves a `trackList.json` file suitable for use with JBrowse. See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services).", response = JBrowseConfigTrackList.class, tags={ "JBrowse Configuration Files" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK", response = JBrowseConfigTrackList.class) })
     @RequestMapping(value = "/jbrowse/config/{domain}/trackList.json",
@@ -45,7 +45,7 @@ public interface JbrowseApi {
         method = RequestMethod.GET)
     ResponseEntity<?> jBrowseConfigTrackList(@ApiParam(value = "The domain we are operating in. This will generally refer to an organism taxon-id.", required = true) @PathVariable("domain") String domain);
 
-    @ApiOperation(value = "Get Features on a Reference Sequence.", nickname = "jBrowseFeaturesGet", notes = "This service provides the functionality for `JBrowse` feature         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatures.class, tags={  })
+    @ApiOperation(value = "Get Features on a Reference Sequence.", nickname = "jBrowseFeaturesGet", notes = "This service provides the functionality for `JBrowse` feature         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatures.class, tags={ "JBrowse Endpoint" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = JBrowseFeatures.class) })
     @RequestMapping(value = "/jbrowse/{domain}/features/{refseq}",
@@ -54,7 +54,7 @@ public interface JbrowseApi {
     ResponseEntity<?> jBrowseFeaturesGet(@ApiParam(value = "The domain we are operating in. This will generally refer to an organism taxon-id.",required=true) @PathVariable("domain") String domain, @ApiParam(value = "The identifier of the reference sequence to find features within.",required=true) @PathVariable("refseq") String refseq, @ApiParam(value = "The starting index.") @Valid @RequestParam(value = "start", required = false) Integer start, @ApiParam(value = "The end index.") @Valid @RequestParam(value = "end", required = false) Integer end, @ApiParam(value = "The type of feature to return.") @Valid @RequestParam(value = "type", required = false) String type, @ApiParam(value = "Make this a reference sequence request.") @Valid @RequestParam(value = "reference", required = false, defaultValue = "false") Boolean reference);
 
 
-    @ApiOperation(value = "Lookup features by name.", nickname = "jBrowseNamesGet", notes = "This service provides the functionality for `JBrowse` name         look-up requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = Object.class, responseContainer = "List", tags={  })
+    @ApiOperation(value = "Lookup features by name.", nickname = "jBrowseNamesGet", notes = "This service provides the functionality for `JBrowse` name         look-up requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = Object.class, responseContainer = "List", tags={ "JBrowse Name Lookup" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = Object.class, responseContainer = "List") })
     @RequestMapping(value = "/jbrowse/names/{domain}",
@@ -63,7 +63,7 @@ public interface JbrowseApi {
     ResponseEntity<List<Object>> jBrowseNamesGet(@ApiParam(value = "The domain for this search (generally an organism).",required=true) @PathVariable("domain") String domain,@ApiParam(value = "The search prefix string to look for. Supply either startswith or equals.") @Valid @RequestParam(value = "startswith", required = false) String startswith,@ApiParam(value = "The name of the item.Supply either startswith or equals.") @Valid @RequestParam(value = "equals", required = false) String equals);
 
 
-    @ApiOperation(value = "Get Binned Density Statistics for a Sub-Set of Features Served by this Store.", nickname = "jBrowseRegionFeatureDensitiesGet", notes = "This service provides the functionality for `JBrowse` binned         region statistics requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={  })
+    @ApiOperation(value = "Get Binned Density Statistics for a Sub-Set of Features Served by this Store.", nickname = "jBrowseRegionFeatureDensitiesGet", notes = "This service provides the functionality for `JBrowse` binned         region statistics requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={ "JBrowse Endpoint" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = JBrowseFeatureStats.class) })
     @RequestMapping(value = "/jbrowse/{domain}/stats/regionFeatureDensities/{refseq}",
@@ -72,7 +72,7 @@ public interface JbrowseApi {
     ResponseEntity<?> jBrowseRegionFeatureDensitiesGet(@ApiParam(value = "The domain we are operating in. This will generally refer to an organism taxon-id.",required=true) @PathVariable("domain") String domain,@ApiParam(value = "The identifier of the reference sequence to find features within.",required=true) @PathVariable("refseq") String refseq,@ApiParam(value = "The starting index.") @Valid @RequestParam(value = "start", required = false) Integer start,@ApiParam(value = "The end index.") @Valid @RequestParam(value = "end", required = false) Integer end,@ApiParam(value = "The type of feature we are interested in.") @Valid @RequestParam(value = "type", required = false) String type,@ApiParam(value = "The number of bases per bin, used to determine the number of bins.") @Valid @RequestParam(value = "basesPerBin", required = false, defaultValue = "20000") String basesPerBin);
 
 
-    @ApiOperation(value = "Get Statistics about the Features Served by this Store.", nickname = "jBrowseStatsGlobalGet", notes = "This service provides the functionality for `JBrowse` global statistics         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={  })
+    @ApiOperation(value = "Get Statistics about the Features Served by this Store.", nickname = "jBrowseStatsGlobalGet", notes = "This service provides the functionality for `JBrowse` global statistics         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={ "JBrowse Endpoint" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = JBrowseFeatureStats.class) })
     @RequestMapping(value = "/jbrowse/{domain}/stats/global",
@@ -81,7 +81,7 @@ public interface JbrowseApi {
     ResponseEntity<?> jBrowseStatsGlobalGet(@ApiParam(value = "The domain we are operating in. This will generally refer to an organism taxon-id.",required=true) @PathVariable("domain") String domain,@ApiParam(value = "The type of feature we are interested in.") @Valid @RequestParam(value = "type", required = false) String type);
 
 
-    @ApiOperation(value = "Get Statistics for a Sub-Set of Features Served by this Store.", nickname = "jBrowseStatsRegionGet", notes = "This service provides the functionality for `JBrowse` region statistics         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={  })
+    @ApiOperation(value = "Get Statistics for a Sub-Set of Features Served by this Store.", nickname = "jBrowseStatsRegionGet", notes = "This service provides the functionality for `JBrowse` region statistics         requests.         <br/><br/>         See [Writing JBrowse Compatible Web Services](http://gmod.org/wiki/JBrowse_Configuration_Guide#Writing_JBrowse-compatible_Web_Services)", response = JBrowseFeatureStats.class, tags={ "JBrowse Endpoint" })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = JBrowseFeatureStats.class) })
     @RequestMapping(value = "/jbrowse/{domain}/stats/region/{refseq}",
