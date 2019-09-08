@@ -200,6 +200,7 @@ public class SequenceExporter extends ExporterSpring
                 }
 
                 //FastaWriterHelper.writeSequence(out, bioSequence);
+                outputString = outputString.concat(">").concat(bioSequence.getAccession().toString()).concat("\n");
                 outputString = outputString.concat(bioSequence.getSequenceAsString()).concat("\n");
 
                 writtenResultsCount++;

@@ -32,7 +32,7 @@ import org.intermine.webservice.server.Format;
 import org.intermine.webservice.server.exceptions.BadRequestException;
 import org.intermine.webservice.server.exceptions.NotImplementedException;
 import org.intermine.webservice.server.exceptions.ServiceException;
-import org.intermine.webservice.server.query.AbstractQueryServiceSpring;
+import org.intermine.webservice.server.query.AbstractQueryService;
 import org.intermine.webservice.server.query.QueryRequestParser;
 import org.intermine.webservice.server.query.result.PathQueryBuilder;
 
@@ -176,9 +176,9 @@ public class SequenceService extends JSONServiceSpring
 
     private PathQuery getQuery() {
         String query = new QueryRequestParser(im.getQueryStore(), request).getQueryXml();
-        String schemaUrl = AbstractQueryServiceSpring.getSchemaLocation(request, "XML");
+        String schemaUrl = AbstractQueryService.getSchemaLocation(request, "XML");
         if (!query.startsWith("<")) {
-            schemaUrl = AbstractQueryServiceSpring.getSchemaLocation(request, "JSON");
+            schemaUrl = AbstractQueryService.getSchemaLocation(request, "JSON");
         }
         PathQueryBuilder bdr = new PathQueryBuilder(im, query, schemaUrl, getListManager());
         return bdr.getQuery();

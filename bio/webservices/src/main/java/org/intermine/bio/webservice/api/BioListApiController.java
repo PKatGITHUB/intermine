@@ -88,7 +88,7 @@ public class BioListApiController extends InterMineController implements BioList
         }
         String result = fastaListService.getOutputString();
         if (isUncompressed()) {
-            ResponseUtilSpring.setCustomTypeHeader(httpHeaders, "results.bed", "text/x-ucsc-bed");
+            ResponseUtilSpring.setCustomTypeHeader(httpHeaders, "results.fa", "text/x-fasta");
         }
         return new ResponseEntity<String>(result,httpHeaders,httpStatus);
     }
@@ -116,7 +116,7 @@ public class BioListApiController extends InterMineController implements BioList
         }
         String result = gff3ListService.getOutputString();
         if (isUncompressed()) {
-            ResponseUtilSpring.setCustomTypeHeader(httpHeaders, "results.bed", "text/x-ucsc-bed");
+            ResponseUtilSpring.setCustomTypeHeader(httpHeaders, "results.gff3", "text/x-gff3");
         }
         return new ResponseEntity<String>(result,httpHeaders,httpStatus);
     }

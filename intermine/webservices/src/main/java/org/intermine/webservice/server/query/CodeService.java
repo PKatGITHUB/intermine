@@ -49,7 +49,7 @@ import static org.apache.commons.lang.StringEscapeUtils.escapeJava;
  * @author Alex Kalderimis
  *
  */
-public class CodeService extends AbstractQueryServiceSpring
+public class CodeService extends AbstractQueryService
 {
     protected static final Logger LOG = Logger.getLogger(CodeService.class);
     private String perlModuleVersion;
